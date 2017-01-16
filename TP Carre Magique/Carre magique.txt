@@ -1,0 +1,162 @@
+AlgoCarreMagique
+//_______________________________________________________________________________
+//BUT: Carre Magique
+//ENTREE: Aucun
+//SORTIE: Affichage carre magique
+//_______________________________________________________________________________
+
+
+CONST
+	MAX:ENTIER<-5
+
+Type 
+	Tableau2D = Tableau[1..MAX,1..MAX] de ENTIER
+
+
+//_______________________________________________________________________________
+//BUT: Initialisation tableau
+//ENTREE: tableau
+//SORTIE: tableau avec valeur 0
+//_______________________________________________________________________________
+
+PROCEDURE InitT(VAR T:Tableau2D)
+
+VAR
+	i,j:ENTIER
+
+
+DEBUT
+	
+	i<-0
+	j<-0
+	
+	POUR i DE 1 A MAX FAIRE
+		POUR j DE 1 A MAX FAIRE
+		
+			T[i,j]<-0
+			
+		FINPOUR
+	FINPOUR
+	
+FINPROCEDURE
+
+
+//_______________________________________________________________________________
+//BUT:Test si la valeur et inferieur a 1 mettre a MAX, si la valeur est a MAX mettre a 1
+//ENTREE: 2 entier
+//SORTIE: 2 entier
+//_______________________________________________________________________________
+
+PROCEDURE TestValeurNbrXY(VAR PosNbrX,PosNbrY:ENTIER)
+
+DEBUT
+	
+	REPETER
+		
+		
+		SI PosNbrX>MAX ALORS		//droite-gauche
+			PosNbrX<-PosNbrX-MAX
+		SINON
+			SI PosNbrX<1 ALORS		//gauche-droite
+				PosNbrX<-PosNbrX+MAX 
+			FINSI
+		FINSI
+
+		SI PosNbrY>MAX ALORS //bas-haut
+			PosNbrY<-PosNbrY-MAX
+		SINON
+			SI PosNbrY<1 ALORS
+				PosNbrY<-PosNbrY+MAX
+			FINSI
+		FINSI
+	
+	JUSQUA ((PosNbrX>=1) ET (PosNbrX<=MAX)) ET ((PosNbrY>=1) ET (PosNbrY<=MAX))
+
+FINPROCEDURE
+
+
+
+//_______________________________________________________________________________
+//BUT:Valeur du tableau(avec condition nord ouest etc)
+//ENTREE: 1 tableau 3 entier
+//SORTIE:1 tableau 
+//_______________________________________________________________________________
+
+PROCEDURE ValeurT(VAR T:Tableau2D; VAR PosNbrX,PosNbrY:ENTIER)
+VAR
+	i,nbr:ENTIER
+
+DEBUT
+
+	nbr<-1
+	
+	//init depart carre magique
+	PosNbrX<-(MAX DIV 2)+1
+	PosNbrY<-(MAX DIV 2)
+	//
+	
+	POUR i DE 1 A MAX*MAX FAIRE
+	
+		//on test x,y
+		TestValeurNbrXY(PosNbrX,PosNbrY)
+		//
+		
+		//On test si la valeur n'ai pas 0
+		SI (T[PosNbrX,PosNbrY]<>0) ALORS
+			//Si elle l'ai on remplace x,y
+			PosNbrX<-PosNbrX-1
+			PosNbrY<-PosNbrY-1
+			//
+			
+			//2eme verification x,y
+			SI PosNbrX>MAX ALORS
+				PosNbrX<-PosNbrX-MAX
+			SINON	
+				SI PosNbrY<1 ALORS
+					PosNbrY<-PosNbrY+MAX
+				SINON
+					SI PosNbrX<1 ALORS
+						PosNbrX<-PosNbrX+MAX
+					FINSI
+				FINSI
+			FINSI
+			//
+			
+			//on remplace
+			T[PosNbrX,PosNbrY]<-nbr
+			//
+			
+			//on continue
+			PosNbrX<-PosNbrX+1
+			PosNbrY<-PosNbrY-1
+			//
+
+FINPROCEDURE
+
+
+VAR
+	T:Tableau2D
+	i,j,nbr,PosNbrX,PosNbrY:ENTIER
+
+DEBUT
+
+	InitT(T)//init tableau
+	
+	ECRIRE 'Bonjour voici le carre magique en ' & MAX & 'x' & MAX
+	
+	ValeurT(T,PosNbrX,PosNbrY)
+	
+	//affiche le tableau
+	POUR i DE 1 A MAX FAIRE
+		POUR j DE 1 A MAX FAIRE
+			ECRIRE T[j,i] & ' '
+		FINPOUR
+	FINPOUR
+	//
+
+FIN.
+
+
+
+
+
