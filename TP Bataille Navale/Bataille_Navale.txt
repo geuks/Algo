@@ -1,0 +1,682 @@
+AlgoBataille_Navale
+//BUT:Bataille Navale
+//ENTREE:2 entier
+//SORTIE:Bateau
+
+CONST
+	MAX=10		//taille de la map
+	MAXNAVIRE=5		//nombre de navire MAX=8
+	MAXTAILLENAVIRE=6		//taille des navires MAX=10
+	
+//DEBUT TYPE
+TYPE
+	cellule = ENREGISTREMENT
+		ligne:ENTIER
+		colonne:ENTIER
+	FINENREGISTREMENT
+	
+TYPE
+	navire = ENREGISTREMENT
+		n : cellule
+		taille: ENTIER
+		nom: CHAINE
+	FINENREGISTREMENT
+	
+TYPE
+	flotte = ENREGISTREMENT
+		n1 : navire
+	FINENREGISTREMENT
+	
+TYPE
+	marge = ENREGISTREMENT
+		x : ENTIER
+		y : ENTIER
+	FINENREGISTREMENT
+
+TYPE
+	Tcellule=TABLEAU [1..100] DE cellule
+	Tbateau=TABLEAU [1..100] DE navire
+	TFlotte=TABLEAU [1..MAXNAVIRE,1..100] of flotte
+	Tnom=TABLEAU [1..8] DE CHAINE
+	T=TABLEAU [1..20]DE ENTIER
+//FIN TYPE
+
+
+	//init tableau
+//BUT:Initialisation a 0 des position des cellules
+//ENTREE:1 tableau d'entier, 1 entier, 1 constante
+//SORTIE:1 tableau d'entier avec valeur 0
+PROCEDURE InitCellule(VAR PosCellule,CelluleTouche:Tcellule)
+VAR
+	i:ENTIER
+DEBUT
+	POUR i DE 1 A MAX FAIRE
+		PosCellule[i].colonne<-0
+		PosCellule[i].ligne<-0
+		CelluleTouche[i].colonne<-0
+		CelluleTouche[i].ligne<-0
+	FINPOUR
+FINPROCEDURE
+//
+
+
+//BUT:Initialisation a 0 de la flotte
+//ENTREE:2 tableau avec 1 sous type Tflotte, et 1 sous type Tbateau
+//SORTIE:2 tableau avec valeur 0
+PROCEDURE InitFlotte(VAR Bateau:Tbateau; VAR Ensemble:TFlotte)
+VAR
+	i,j:ENTIER
+DEBUT
+	POUR i DE 1 A MAX FAIRE
+		Bateau[i].n.colonne<-0
+		Bateau[i].n.ligne<-0
+		POUR j DE 1 A MAXNAVIRE FAIRE
+			Ensemble[j,i].n1.n.colonne<-0
+			Ensemble[j,i].n1.n.ligne<-0
+		FINPOUR
+	FINPOUR
+FINPROCEDURE
+//
+	//fin init	
+
+	
+	//Toutes les procedures d'affichage
+//BUT:Affiche la map du jeu
+//ENTREE:3 entier
+//SORTIE:affichage 
+PROCEDURE AfficheMap()
+VAR
+	cpt,i,j:ENTIER
+
+DEBUT
+		cpt<-7
+	POUR i DE 1 A MAX FAIRE		//Afficher 1-10 horizontal
+		PositionEcran(cpt,5)
+		ECRIRE i
+		cpt<-cpt+4;
+	FINPOUR
+	
+	cpt<-8
+	POUR i DE 1 A MAX FAIRE		//Affiche 1-10 vertical
+		POUR j DE 1 A MAX*3 FAIRE
+			PositionEcran(3,cpt)
+			ECRIRE Chr(i+64)
+		end;
+		cpt<-cpt+3
+	FINPOUR
+	
+	
+	cpt<-6
+	POUR i DE 1 A MAX+1 FAIRE		//Affiche les _
+		POUR j DE 6 A (MAX*4)+4 FAIRE
+			PositionEcran(j,cpt)
+			ECRIRE '_'
+		FINPOUR
+		cpt<-cpt+3
+	FINPOUR
+	
+	
+	POUR i DE 7 A (MAX*3)+6 FAIRE		//Affiche les |
+		cpt<-5
+		POUR j DE 0 A MAX FAIRE
+			PositionEcran(cpt,i)
+			ECRIRE '|'
+			cpt<-cpt+4;
+		FINPOUR
+	FINPOUR
+	
+FINPROCEDURE
+//
+
+
+//BUT:Affiche le menu lateral
+//ENTREE:1 entier
+//SORTIE:affichage
+PROCEDURE AfficheLateral()
+VAR
+	i:ENTIER
+DEBUT
+
+	POUR i DE MAX to (MAX*3) FAIRE
+		PositionEcran((MAX*5)-2,i)		//Affiche les | menu lateral
+		ECRIRE '|'
+		
+		PositionEcran((MAX*7)+2,i);
+		ECRIRE '|'
+	end;
+
+	POUR i DE (MAX*5)-1 A (MAX*7)+1 FAIRE
+		PositionEcran(i,MAX-1)		//Affiche les _ menu lateral
+		ECRIRE '_'
+		
+		PositionEcran(i,(MAX*3))
+		ECRIRE '_'
+	FINPOUR
+FINPROCEDURE
+//
+
+
+//BUT:affiche le nombre de cellule restante a la flotte
+//ENTREE:2 entier
+//SORTIE:affichage
+PROCEDURE AfficherFlotte(Bateau:Tbateau; margin:marge; tailleB:T)
+VAR
+	i,cpt:ENTIER
+DEBUT
+	cpt<-5
+	POUR i DE 1 A MAXNAVIRE FAIRE
+		PositionEcran(margin.x,margin.y+cpt);					//Affiche par
+		SI tailleB[i]<0 ALORS									//Exemple: Porte-Avion:5
+			ECRIRE Bateau[i].nom & ':' & 'X'
+			SINON
+				ECRIRE Bateau[i].nom & ':' & tailleB[i]
+			FINSI
+		FINSI
+		cpt<-cpt+1
+	FINPOUR
+	
+	PositionEcran(Margin.x,Margin.y+4)
+	ECRIRE 'Case restantes:'
+
+FINPROCEDURE
+//
+	//FIN affichage
+	
+
+	//Tout les fonctions test
+//BUT:Test les cases suivante dans la direction X pour chaque taille d'un bateau
+//ENTREE:1 tableau type Tbateau, 1 tableay type Tcellule,5 entier, 2 boolean
+//SORTIE:1 boolean
+FONCTION TestCaseLigne(Bateau:Tbateau;PosCellule:Tcellule;x,y,i:ENTIER):BOOLEEN
+VAR
+	j:ENTIER
+	test,test2:BOOLEEN
+DEBUT
+	test<-FAUX
+	test2<-VRAI
+	POUR j DE 1 A Bateau[i].taille FAIRE
+	begin
+		//Si la cellule bateau y <> de la position y Et que la cellule bateau x <> de la position x +j
+		SI (Bateau[j].n.colonne<>PosCellule[y].colonne) ET (Bateau[j].n.ligne<>PosCellule[(x+(j-1))].ligne) ALORS
+			test<-VRAI	
+		FINSI
+		
+		SI test=FAUX ALORS
+			test2<-FAUX
+		FINSI
+	FINPOUR
+	
+	SI test2=FAUX ALORS
+		test<-FAUX
+	FINSI
+	
+		TestCaseLigne<-test
+
+FINFONCTION
+//
+
+
+	//Tout les fonctions test
+//BUT:Test les cases suivante dans la direction y pour chaque taille d'un bateau
+//ENTREE:1 tableau type Tbateau, 1 tableay type Tcellule,5 entier, 2 boolean
+//SORTIE:1 boolean
+FONCTION TestCaseColonne(Bateau:Tbateau;PosCellule:Tcellule;x,y,i:ENTIER):BOOLEEN
+VAR
+	j:ENTIER
+	test,test2:BOOLEEN
+DEBUT
+
+	test<-FAUX	
+	POUR j DE 1 A Bateau[i].taille FAIRE
+		SI (Bateau[j].n.colonne<>PosCellule[(y+(j-1))].colonne) ET (Bateau[j].n.ligne<>PosCellule[x].ligne) ALORS
+			test<-VRAI
+		FINSI
+		
+		SI test=FAUX ALORS
+			test2<-FAUX
+		FINSI
+	FINPOUR
+	
+	SI test2=FAUX ALORS
+		test<-FAUX
+	FINSI
+
+	TestCaseColonne<-test
+
+FINFONCTION
+//
+
+
+//BUT:Test pour que les bateaux de se superpose pas
+//ENTREE:1 tableau type Tbateau,1 tableau type Tflotte, 4 entier, 1 booleen
+//SORTIE:1 boolean
+FONCTION TestCase(Bateau:Tbateau; Ensemble:TFlotte):BOOLEEN
+VAR
+	i,j,l,k:ENTIER
+	test:BOOLEEN
+DEBUT
+	test<-VRAI
+	
+	POUR i DE 1 A MAXNAVIRE FAIRE
+		POUR j DE 1 A MAXNAVIRE FAIRE
+			POUR k DE 1 A Bateau[i].taille FAIRE
+				POUR l DE 1 A Bateau[i].taille FAIRE
+					SI (Ensemble[i,k].n1.n.ligne=Ensemble[j,l].n1.n.ligne) ET (Ensemble[i,k].n1.n.colonne=Ensemble[j,l].n1.n.colonne) ET (j<>i) ALORS
+						testw-FAUX
+					FINSI
+				FINPOUR
+			FINPOUR
+		FINPOUR
+	FINPOUR
+	TestCase<-test
+FINFONCTION
+//
+
+
+//BUT:converti les chaine (caractere) en entier (Ex:'10'>10)
+//ENTREE:1 string
+//SORTIE:1 entier
+FONCTION one1(car:CHAINE):ENTIER 
+DEBUT
+		SI LONGUEUR(car)=1 ALORS
+			SI(ord(car[1])>=48) ET (ord(car[1])<=57) ALORS
+				one1<-ord(car[1])-48
+				SINON
+				one1<-0
+				FINSI
+			FINSI
+		SINON
+			SI LONGUER(car)=2 ALORS
+				
+				SI (ord(car[1])=49) ET (ord(car[2])=48)ALORS
+					one1<-10
+					SINON
+						one1<-0
+					FINSI
+				FINSI
+				
+			FINSI
+
+FINFONCTION
+//
+
+
+//BUT:convertir les caractere en entier
+//ENTREE:1 caractere
+//SORTIE:1 entier
+FONCTION a1(car:CARACTERE):ENTIER
+DEBUT
+	SI (ord(car)>=97) ET (ord(car)<97+MAX) ALORS
+		a1<-ord(car)-96
+		SINON
+			a1<-11
+		FINSI
+	FINSI
+FINFONCTION
+//
+
+
+//BUT:Test Si les coord entrer existe
+//ENTREE:1 tableau type TFlotte, 1 tableau type Tbateau, 1 tableau type Tcellule, 3 entier
+//SORTIE:1 boolean
+FONCTION trouver(Ensemble:TFlotte;Bateau:Tbateau;PosCellule:Tcellule;x,y:ENTIER;VAR nbr:ENTIER):BOOLEEN
+VAR
+	i,j:ENTIER
+	test:BOOLEEN
+BEGIN
+	test<-FAUX
+	POUR i DE 1 A MAXNAVIRE FAIRE
+		POUR j DE 1 A Bateau[i].taille FAIRE
+			SI (Ensemble[i,j].n1.n.colonne=PosCellule[y].colonne) ET (Ensemble[i,j].n1.n.ligne=PosCellule[x].ligne) ALORS
+				test<-VRAI
+				nbr<-i	//Si la position entree = a la position du bateau
+			FINSI
+		FINPOUR
+	FINPOUR
+	trouver<-test
+FINFONCTION
+//
+
+
+//BUT:Test si tout les bateau on coule
+//ENTREE:1 tableau type T
+//SORTIE:1 boolean
+FONCTION Final(Nb:T):BOOLEEN
+VAR
+	i,cpt:ENTIER
+	test:BOOLEEN
+DEBUT
+	test<-FAUX
+	cpt<-0
+	POUR i DE 1 A MAXNAVIRE FAIRE
+		SI Nb[i]<1 ALORS
+			cpt<-cpt+1
+			SI cpt=MAXNAVIRE ALORS
+				test<-VRAI
+			FINSI
+		FINSI
+	FINPOUR
+	
+	Final<-test
+
+FINFONCTION
+//
+	//FIN test
+	
+
+	//tout les procedure de creation
+//BUT:Affecte les valeur x y a Pos
+//ENTREE:1 tableau type PosCellule, 2 entier
+//SORTIE:Tableau N valeur
+PROCEDURE CreateCellule(VAR PosCellule:Tcellule)
+VAR
+	cpt,i:ENTIER
+DEBUT	
+	
+	cpt<-7
+	POUR i DE 1 A MAX FAIRE	//Valeur des cases y
+		PosCellule[i].ligne<-cpt
+		cpt<-cpt+4
+	FINPOUR
+
+	cpt<-8
+	POUR i DE 1 A MAX FAIRE	//Valeur des cases x
+		PosCellule[i].colonne<-cpt
+		cpt<-cpt+3
+	FINPOUR
+
+
+FINPROCEDURE
+//
+
+
+//BUT:Affecte les valeur des cellules a bateau
+//ENTREE:1 tableau type Tcellule, 1 tableau type Tbateau, 4 entier, 1 boolean
+//SORTIE:1 tableau N cellule
+PROCEDURE CreateNavire (PosCellule:Tcellule;VAR Bateau:Tbateau;i:ENTIER)
+var
+	j,x,y,randdirection:ENTIER
+	test:BOOLEEN
+DEBUT
+
+	REPETER
+
+	Randomize
+	
+	
+		RandDirection<-Random(2)+1	//Pour choisir le positionnement au hasard
+	
+		CAS RandDirection PARMIS
+			CAS 1:REPETER			//Positionnement bateau vertical
+							x<-Random(MAX)+1	//positionnement au hasard
+							y<-Random(MAX)+1
+						JUSQUA (y<=MAX-Bateau[i].taille)
+						
+						test<-TestCaseColonne(Bateau,PosCellule,x,y,i)	//test si les cases sont vide pour le bateau
+						SI test=true ALORS
+							
+							POUR j DE 1 A Bateau[i].taille FAIRE
+								Bateau[j].n.colonne<-PosCellule[(y+j)-1].colonne
+								Bateau[j].n.ligne<-PosCellule[x].ligne
+							FINPOUR
+						FINSI		
+	
+			FINCAS 1
+			
+				
+			CAS 2:REPETER		//Positionnement horizontal
+								x<-Random(MAX)+1 	//positionnement au hasard
+								y<-Random(MAX)+1
+						JUSQUA (x<=MAX-Bateau[i].taille)
+						
+						test<-TestCaseLigne(Bateau,PosCellule,x,y,i);	//test si les cases sont vide pour le bateau
+						SI test=true ALORS
+							
+							POUR j DE 1 A Bateau[i].taille FAIRE
+								Bateau[j].n.colonne<-PosCellule[y].colonne
+								Bateau[j].n.ligne<-PosCellule[(x+j)-1].ligne
+							FINPOUR
+						FINSI		
+			
+					
+				
+			FINCAS 2
+		FINCASPARMIS
+
+	JUSQUA (test=VRAI)
+
+FINPROCEDURE
+//
+
+
+//BUT:defini la taille d'une bateau
+//ENTREE:1 tableau type Tbateau, un tableau typea T, 2 entier
+//SORTIE:un tableau type T avec N entier
+PROCEDURE TailleBateau(VAR Bateau:Tbateau;VAR tailleB:T)
+var
+	i,nbr:ENTIER
+DEBUT
+	
+	Randomize;
+	
+	POUR i<-1 A MAXNAVIRE FAIRE
+		REPETER
+			nbr<-Random(MAXTAILLENAVIRE)+1
+		JUSQUA nbr>1
+		
+		Bateau[i].taille<-nbr
+		tailleB[i]<-Bateau[i].taille;
+	FINPOUR
+
+FINPROCEDURE
+//
+
+
+//BUT:Deffini le nom des bateau
+//ENTREE:1 tableau type Tnom,1 tableau type Tbateau,1 entier
+//SORTIE:1 tableau type Tnom avec N valeur string
+PROCEDURE NomBateau (VAR Nom:Tnom;VAR Bateau:Tbateau)
+VAR
+  i:ENTIER
+BEGIN
+
+	Nom[1]<-'Torpilleur'
+	Nom[2]<_'Sous-Marin'
+	Nom[3]<-'Contre-Torpilleur'
+	Nom[4]<-'Croiseur'
+	Nom[5]<-'Porte-Avions'
+	Nom[6]<-'Corvette'
+	Nom[7]<-'Cuirasse'
+	Nom[8]<-'Destroyeur'
+	
+	POUR i DE 1 A MAXNAVIRE FAIRE
+		Bateau[i].nom<-Nom[i]
+	FINPOUR
+
+FINPROCEDURE
+//
+
+
+//BUT:Affecte les valeurs des bateaux a la flotte
+//ENTREE:1 tableau type Tbateau, 1 tableau type Tcellule, 1 tableau type Ensemble,2 entier, 1 boolean
+//SORTIE:Tableau type Tflotte avec N valeur entier
+PROCEDURE CreateFlotte (Bateau:Tbateau; PosCellule:Tcellule; VAR Ensemble:TFlotte)
+VAR
+	i,j:ENTIER
+	test:BOOLEEN
+DEBUT
+
+	REPETER
+		InitFlotte(Bateau,Ensemble)
+		
+		POUR i DE 1 A MAXNAVIRE FAIRE
+
+			CreateNavire(PosCellule,Bateau,i)
+
+			POUR j DE 1 A Bateau[i].taille FAIRE
+					Ensemble[i,j].n1.n.ligne<-Bateau[j].n.ligne;
+					Ensemble[i,j].n1.n.colonne<-Bateau[j].n.colonne;
+			FINPOUR
+
+		FINPOUR
+
+		test<-TestCase(Bateau,Ensemble)
+		
+	JUSQUA (test=true)
+
+FINPROCEDURE
+//
+	//Fin creation
+	
+
+	//Debut programme principal
+VAR
+	
+	PosCellule,CelluleTouche:Tcellule
+	bateau:Tbateau
+	Nom:Tnom
+	tailleB:T
+	margin:marge
+	Ensemble:TFlotte
+	x1,y1,i,k,j,nbr:ENTIER
+	y:CARACTERE
+	x,pseudo:CHAINE
+	test:BOOLEEN
+	
+	
+BEGIN
+	
+	
+	InitCellule(PosCellule,CelluleTouche)		// Init des cellules
+
+	AfficheMap()		//affiche le terrain
+	
+	AfficheLateral()		//affiche menu lateral
+	
+	CreateCellule(PosCellule)		//créer les cellules
+
+	TailleBateau(Bateau,tailleB)		//defini le nombre de cellule des bateau
+	
+	NomBateau(Nom,Bateau)		//affecte les nom des bateau
+	
+	CreateFlotte(Bateau,PosCellule,Ensemble)		//creer la flotte de bateau
+	
+
+	margin.x<-(MAX*4)+10;
+	margin.y<-MAX;
+	
+	PositionEcran(margin.x DIV 2,1)
+	ECRIRE 'Bataile Navale !'
+	
+	PositionEcran(margin.x,margin.y)
+	ECRIRE 'Bienvenue Commandant,' 
+	PositionEcran(margin.x,margin.y+1)
+	ECRIRE 'Quel est votre nom ?'
+	
+	REPETER		//boucle pseudo
+		PositionEcran(margin.x,margin.y+2)
+		ECRIRE '- '
+		LIRE pseudo
+		pseudo<-MAJUSCULE(pseudo)
+	JUSQUA (LONGUEUR(pseudo)<=10) ET (LONGUEUR(pseudo)>1)
+	
+	
+	PositionEcran(margin.x,margin.y)
+	ECRIRE 'Bienvenue !'
+	PositionEcran(margin.x,margin.y+1)
+	ECRIRE 'Commandant ' & pseudo
+
+	AfficherFlotte(Bateau,margin,tailleB)
+	
+	REPETER		//boucle fin du jeu
+
+			REPETER	//boucle coord x
+				
+				PositionEcran(margin.x,margin.y+13)
+				ECRIRE 'Coordonne x ? 1-10')
+				PositionEcran(margin.x,margin.y+14)
+				ECRIRE '.'
+				LIRE(x)
+				x1<-one1(x)
+			JUSQUA (x1<>0) ET (x<>'')
+			
+			
+			REPETER	//boucle coord y
+
+				PositionEcran(margin.x,margin.y+15)
+				ECRIRE 'Coordonne y ? a-j'
+				PositionEcran(margin.x,margin.y+16)
+				ECRIRE '.'
+				LIRE y
+				y<-MINUSCULE(y)
+				y1<-a1(y)
+				SI (y1=11) ALORS
+					POUR i<-margin.x A margin.x+10 FAIRE
+						PositionEcran(i,margin.y+16)
+						ECRIRE ' '
+					FINPOUR
+				FINSI
+			JUSQUA (y1<>11)
+
+		//si les valeur corresponde
+		test<-trouver(Ensemble,Bateau,PosCellule,x1,y1,nbr)
+		
+		SI test=VRAI ALORS
+			
+			//si les cellule touche est different de la cellule donne
+			SI (CelluleTouche[nbr].ligne<>PosCellule[x1].ligne) OU (CelluleTouche[nbr].colonne<>PosCellule[y1].colonne) ALORS
+				
+				SI (tailleB[nbr]>0) ALORS
+				
+				CelluleTouche[nbr].ligne<-PosCellule[x1].ligne
+				CelluleTouche[nbr].colonne<-PosCellule[y1].colonne
+			
+				PositionEcran(PosCellule[x1].ligne,PosCellule[y1].colonne)
+				ECRIRE 'T'
+				PositionEcran(margin.x,margin.y+24)
+				ECRIRE Nom[nbr] & ' toucher !'
+				tailleB[nbr]<-tailleB[nbr]-1
+				FINSI
+				
+				SI tailleB[nbr]<=0 ALORS	//si bateau detruit
+
+					PositionEcran(margin.x,margin.y+25)
+					ECRIRE Nom[nbr] & ' a ete coule !')
+
+					POUR i DE 1 A Bateau[nbr].taille FAIRE
+
+						PositionEcran(Ensemble[nbr,i].n1.n.ligne,Ensemble[nbr,i].n1.n.colonne)
+						ECRIRE 'C'
+					FINPOUR
+					
+					tailleB[nbr]<- -1
+				FINSI
+				
+			FINSI
+			
+		SINON
+			PositionEcran(margin.x,margin.y+24)
+			ECRIRE 'Vous avez tirez dans la mer !'
+			PositionEcran(PosCellule[x1].ligne,PosCellule[y1].colonne)
+
+			ECRIRE 'X'
+
+		FINSI
+		
+		AfficherFlotte(Bateau,margin,tailleB)
+			
+		test<-Final(tailleB) 	// test si tout les bateau detruit
+
+	JUSQUA test=VRAI //fin du jeu
+	
+	
+	PositionEcran(margin.x,margin.y+24)
+	ECRIRE 'Fin de la partie !')
+	PositionEcran(margin.x,margin.y+25)
+	ECRIRE 'Merci d''avoir jouer,'
+	PositionEcran(margin.x,margin.y+26)
+	ECRIRE 'developper par Geuks.'
+	
+
+FIN.
+//FIN PROGRAMME PRINCIPAL
