@@ -1,0 +1,11 @@
+// Installation de SDL 2 //
+
+1- Ouvrez le dossier "FICHIER", puis desarchivez "Pascal-SDL-2-Headers-master.zip"
+2- Copier les fichiers desarchiver dans votre dossier de pascal units "C:\FPC\2.6.4*\units\" par defaut
+dans un nouveau dossier nommé "SDL2"
+3- Ouvrez le dossier "FICHIER", puis ouvrez le dossier 32bits/64bits en fonction de votre Windows.
+4- Desarchivez les deux archives "SDL2-2.0.5-win32.zip" et "SDL2_image-2.0.1-win32.zip"
+5- Copier les fichiers desarchivez ( SDL2.DLL etc..) dans votre dossier "C:\WINDOWS\SYSTEM32"
+ou bien dans votre dossier ou il y a votre programme a compiler si cela ne fonctionne pas.
+
+*votre version

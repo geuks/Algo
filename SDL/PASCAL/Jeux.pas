@@ -10,16 +10,20 @@ sdlTexture1 : PSDL_Texture;
 begin
 
   //initilization of video subsystem
-  if SDL_Init( SDL_INIT_VIDEO ) < 0 then HALT;
-
-  sdlWindow1 := SDL_CreateWindow( 'Window1', 100{x}, 100{y}, 500, 500, SDL_WINDOW_SHOWN );
+  if SDL_Init( SDL_INIT_VIDEO ) < 0 then HALT;//si il renvoie rien on ferme le programme
+	
+	//creation de la fenetre
+  sdlWindow1 := SDL_CreateWindow( 'Jeux', 100{x}, 100{y}, 500{hauteur}, 500{largeur}, SDL_WINDOW_MAXIMIZED );
   if sdlWindow1 = nil then HALT;
-
-  sdlRenderer := SDL_CreateRenderer( sdlWindow1, -1, 0 );
+	
+	//on fait un rendu
+  sdlRenderer := SDL_CreateRenderer( sdlWindow1, -1{driver}, 0{mode utiliser} );
   if sdlRenderer = nil then HALT;
-
+	
+	//on affiche la texture
   sdlTexture1 := IMG_LoadTexture( sdlRenderer, 'wolf2.bmp' );
   if sdlTexture1 = nil then HALT;
+	
   SDL_RenderCopy( sdlRenderer, sdlTexture1, nil, nil );
   SDL_RenderPresent (sdlRenderer);
   SDL_Delay( 2000 );
