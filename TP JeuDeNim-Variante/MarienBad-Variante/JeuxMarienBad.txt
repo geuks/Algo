@@ -1,0 +1,185 @@
+	//BUT:Le jeu se joue à deux. Les deux joueurs se partagent un tas de 21 allumettes.
+À tour de rôle, ils doivent retirer 1, 2 ou 3 allumettes du tas  
+le joueur qui retire la dernière allumette a perdu.}
+//ENTREE:des entiers donnès par 2 joueurs
+//SORTIE:1 gagnant
+programJeuNim 
+
+CONSR
+	MAXx=16 	//Nbr d'allumettes max
+	MAXy=4 		//nbr de lignes
+
+Type
+	T=Tableau[1..(MAXx DIV 2)-1] DE ENTIER 
+
+
+	//BUT: Pseudo du joueur
+//ENTREE:1 chaine
+//SORTIE:stock dans une variable
+PROCEDURE PseudoJoueur(var pseudo:CHAINE; joueur:ENTIER) 
+DEBUT
+
+	REPETER		//pseudo joueur 1
+		ECRIRE('Entrez le pseudo du joueur ' & joueur & ' (8 caracteres max):') 
+		LIRE(pseudo) 
+		SI (pseudo='') OU (LONGUEUR(pseudo)>8) ALORS
+			ECRIRE('Error') 
+		FINSI
+	JUSQU'A (pseudo<>'') ET (LONGUEUR(pseudo)<=8) 
+
+FINPROCEDURE 
+//
+
+
+//BUT:Initialise les valeur des allumettes sur chaque ligne
+//ENTREE:1 tableau 2 entiers
+//SORTIE:valeur initialisé du tableau
+PROCEDURE InitAllumettes(var allumettes:T) 
+var
+	i,cpt:ENTIER 
+DEBUT
+	
+	cpt<-0 
+	POUR i<-1 A MAXy FAIRE
+		allumettes[i]<-1+cpt 
+		cpt<-cpt+2 
+	FINPOUR
+	
+FINPROCEDURE
+//
+
+
+//BUT:affiche le nombre d'allumettes restante sur l'ecran de l'utilisateur
+//ENTREE:1 tableau, 2 entiers
+//SORTIE:affichage
+PROCEDURE AfficheAllumettes(allumettes:T) 
+var
+	i,j:ENTIER 
+DEBUT
+	
+	POUR i<-1 A MAXy FAIRE
+		ECRIRE(i,': ') 
+		POUR j<-1 A allumettes[i] FAIRE
+			ECRIRE('|') 
+		FINSI
+	FINPOUR
+	
+FINPROCEDURE
+//
+
+
+//BUT:le tour d'un joueur 
+//ENTREE:1 tableau 1 chaine 3 entiers
+//SORTIE:1 entiers
+PROCEDURE TourJoueur(joueur:CHAINE var allumettes:T) 
+var
+	i,x,y:ENTIER 
+DEBUT
+	
+	ECRIRE('Nombre d''allumettes restante(s): ') 
+ 
+	AfficheAllumettes(allumettes)  
+	
+	ECRIRE('A vous de jouer ',joueur) 
+	
+	REPETER
+		ECRIRE('Ligne: ') 
+		LIRE(y) 
+		SI (y<1) OU (y>4) ALORS
+			ECRIRE('Erreur 1-',MAXy,' max') 
+		else 
+			SI (allumettes[y]=0) ALORS
+				ECRIRE('Il n''ya plus d''allumettes.') 
+			FINSI
+		FINSI
+	JUSQU'A (y>0) ET (y<5) ET (allumettes[y]<>0) 
+	
+	ECRIRE('Combien voulez vous retirer d''alumettes ?') 
+	
+	REPETER
+		ECRIRE('- ') 
+		LIRE(x) 
+		SI (x<1) OU (x>allumettes[y]) ALORS 
+			ECRIRE('Erreur 1-',allumettes[y],' max') 
+		FINSI 
+	JUSQU'A (x>0) ET (x<=allumettes[y]) 
+	
+	allumettes[y]<-allumettes[y]-x 
+
+FINPROCEDURE
+//
+
+
+//BUT:Test si il n'y a plus d'allumette
+//ENTREE:1 tableau 1 entier 1 booleen
+//SORTIE:1 booleen
+FONCTION TestFin(allumettes:T):BOOLEEN 
+var
+	i:ENTIER 
+	test:BOOLEEN 
+DEBUT
+
+	test<-vrai 
+	
+	POUR i<-1 A MAXy FAIRE
+		SI allumettes[i]<>0 ALORS
+			test<-faux 
+		FINSI
+	FINPOUR
+	
+	TestFin<-test 
+
+FINFONCTION
+
+
+
+	//Programme principal
+var
+	allumettes:T 
+	joueur1,joueur2:CHAINE 
+  test,perdu:BOOLEEN 
+DEBUT
+	
+	test<-faux
+	
+	ECRIRE('Bonjour et bienvenue dans le jeu de Nim !') 
+	
+	PseudoJoueur(joueur1,1) 
+	PseudoJoueur(joueur2,2) 
+	
+
+	
+	ECRIRE('Le jeu se joue a deux.') 
+	ECRIRE('Les deux joueurs se partagent un tas de 16 allumettes sur 4 lignes. ') 
+	ECRIRE('A tour de role, ils doivent retirer des allumettes dans une seule des lignes   ') 
+	ECRIRE('le joueur qui retire la derniere allumette a perdu.') 
+	
+	
+	InitAllumettes(allumettes) 
+	
+	REPETER
+		
+		SI test=faux ALORS 
+			TourJoueur(joueur1,allumettes) 
+		FINSI
+		test<-TestFin(allumettes) 
+		
+		SI test=vrai ALORS 
+			ECRIRE(joueur1, ' a perdu !') 
+		FINSI
+		
+		SI test=faux ALORS 
+			TourJoueur(joueur2,allumettes)
+		FINSI
+		test<-TestFin(allumettes) 
+		
+		SI test=vrai ALORS 
+			ECRIRE(joueur2, ' a perdu !') 
+		FINSI
+		
+	JUSQU'A test=vrai 
+	
+	ECRIRE('Fin de la partie !') 
+	
+	
+FIN.

@@ -1,0 +1,39 @@
+JEUX DE TEST
+
+allumettes=21
+
+joueur1= John
+joueur2= Yves
+
+allumettes>0 on entre dans le si
+procedure TourJoueurs(John,21)
+
+	NbrRetire=3
+	
+	fonction TestValeur(3,21)
+	TestValeur=vrai
+	on quitte la fonction
+	
+	allumettes=21-3
+	allumettes=18
+	
+on quitte la procedure
+
+allumettes>0 on entre dans le si
+procedure TourJoueurs(Yves,18)
+
+	NbrRetire=2
+	
+	fonction TestValeur(2,18)
+	TestValeur=vrai
+	on quitte la fonction
+	
+	allumettes=18-2
+	allumettes=16
+	
+on quitte la procedure
+
+........
+
+
+

@@ -1,0 +1,200 @@
+	//BUT:Le jeu se joue à deux. Les deux joueurs se partagent un tas de 21 allumettes.
+À Aur de rôle, ils doivent retirer 1, 2 ou 3 allumettes du tas  
+le joueur qui retire la dernière allumette a perdu.}
+//ENTREE:des entiers donnès par 2 joueurs
+//SORTIE:1 gagnant
+programJeuNim
+
+CONST
+	MAX=21 	//Nbr d'allumettes max
+
+
+	//BUT: Pseudo du joueur
+//ENTREE:1 chaine
+//SORTIE:stock dans une variable
+PROCEDURE PseudoJoueur(VAR Pseudo:CHAINE) 
+DEBUT
+
+	REPETER		//Pseudo joueur 1
+		ECRIRE('Entrez le Pseudo du joueur (8 caractere max):') 
+		LIRE(Pseudo) 
+		SI (Pseudo='') OU (LONGUEUR(Pseudo)>8) ALORS
+			ECRIRE('Error') 
+		FINSI
+	JUSQU'A (Pseudo<>'') ET (LONGUEUR(Pseudo)<=8) 
+FINPROCEDURE
+//
+	
+
+	//BUT:Test si la valeur entree est bien entre 1 et 3 et que les allumettes restante soit superieur ou egale a 0
+//ENTREE:2 entiers
+//SORTIE:1 booleen
+FONCTION TestValeur(nbr,allumettes:ENTIER):BOOLEEN 
+VAR
+	test:BOOLEEN 
+DEBUT
+	test<-faux 
+	SI (nbr>0) ET (nbr<4) ET (allumettes-nbr>=0) 
+		ALORS test<-vrai 
+	FINSI
+	
+	TestValeur<-test 
+FINFONCTION
+//
+
+
+	//BUT:Tour d'un joueur
+//ENTREE:1 chaine 2 entier
+//SORTIE:1 entier 1 booleen
+PROCEDURE TourJoueurs(Pseudo1:CHAINE; VAR allumettes:ENTIER; VAR perdu:BOOLEEN) 
+VAR
+	NbrRetire,i:ENTIER 
+DEBUT
+
+	ECRIRE('Nombre d''allumettes restante(s): ' & allumettes) 
+	ECRIRE('- ') 
+	POUR i<-1 A allumettes FAIRE
+		ECRIRE('|') 
+	FINPOUR
+	
+	
+	REPETER
+		ECRIRE('Combien d''allumettes voulez-vous retirer ' & pseudo1 & ' 1-3 ? ') 
+		ECRIRE('- ') 
+
+		LIRE(NbrRetire) 
+		SI (TestValeur(NbrRetire,allumettes)=faux) ET (allumettes-NbrRetire>=0) ALORS
+			ECRIRE('Erreur 1 a 3') 
+		SINON
+			SI allumettes-NbrRetire<0 ALORS
+				ECRIRE('Erreur le nombre d''allumettes ne peut pas etre negatif') 
+			FINSI
+		FINSI
+			
+	JUSQU'A TestValeur(NbrRetire,allumettes)=vrai 
+	
+	allumettes<-allumettes-NbrRetire 
+	
+	SI allumettes=0 ALORS perdu<-vrai 
+	
+FINPROCEDURE
+//
+
+
+	//BUT:Verifie si la valeur est bien un multiple de 4 +1
+//ENTREE:2 entier
+//SORTIE:1 booleen
+FONCTION TestIA(allumettes,NbrRetire:ENTIER):BOOLEEN 
+VAR
+	test:BOOLEEN 
+DEBUT
+	SI ((allumettes-NbrRetire)MOD 4 =0+1) ALORS TestIA<- vrai
+	SINON
+		TestIA<-faux 
+FIN 
+//
+
+
+	//BUT:Tour de l'IA
+//ENTREE:2 entier 1 booleen
+//SORTIE:1 entier 1 booleen
+PROCEDURE TourIA(Var allumettes:ENTIER VAR perduIA:BOOLEEN) 
+VAR
+	NbrRetire,i,test2:ENTIER 
+  test:BOOLEEN 
+DEBUT
+
+	test2<-0 
+	test<-faux 
+	
+	ECRIRE('Au Aur de l''IA !') 
+	ECRIRE('Nombre d''allumettes restante(s): ' & allumettes) 
+	ECRIRE('- ') 
+	POUR i<-1 A allumettes FAIRE
+		ECRIRE('|') 
+	FINPOUR
+
+	REPETER
+		NbrRetire<-Random(3)+1 
+		test<-TestIA(allumettes,NbrRetire) 
+		test2<-test2+1 //si a partir de 10 fois il ne trouve pas renvoie un nombre au hasard
+	JUSQU'A ((test=vrai) ET (allumettes-NbrRetire>=0)) OU ((test2>10) ET (allumettes-NbrRetire>=0)) 
+	
+	ECRIRE('L''IA retire ' & NbrRetire) 
+	allumettes<-allumettes-NbrRetire 
+	
+	SI allumettes=0 ALORS perduIA<-vrai 
+	
+	
+FINPROCEDURE
+//
+
+
+	//Programme principal
+VAR
+	allumettes,premier:ENTIER 
+	joueur1,IA:CHAINE 
+	perdu,perduIA:BOOLEEN 
+DEBUT
+
+	//init des valeurs
+	Randomize 
+	
+	allumettes<-MAX 
+	perdu<-faux 
+	perduIA<-faux 
+	joueur1=''
+	//
+	
+	
+	ECRIRE('Bonjour et bienvenue dans le jeu de Nim !') 
+	
+	//on recupere le Pseudo du joueur
+	PseudoJoueur(joueur1) 
+
+	
+	ECRIRE('Le jeu se joue a deux.') 
+	ECRIRE('Les deux joueurs se partagent un tas de 21 allumettes. ') 
+	ECRIRE('A Aur de role, ils FAIREivent retirer 1, 2 ou 3 allumettes du tas   ') 
+	ECRIRE('le joueur qui retire la derniere allumette a perdu.') 
+	
+	
+	//celui qui commence aleaAirement
+	premier<-Random(2)+1 
+
+	//boucle de test jusqua qu'il n'y a plus d'allumette
+	REPETER
+		
+		CAS premier PARMIS
+			CAS 1:DEBUT
+							SI allumettes>0 ALORS 
+								TourJoueurs(joueur1,allumettes,perdu) 
+							FINSI
+							SI perdu=vrai ALORS 
+								ECRIRE(joueur1, ' a perdu !') 
+							FINSI
+						FIN 
+			
+			CAS 2:DEBUT
+							SI allumettes>0 ALORS 
+								TourIA(allumettes,perduIA)
+							FINSI
+							SI perduIA=vrai ALORS 
+								ECRIRE('IA a perdu !') 
+							FINSI
+						FIN 
+		FINCASPARMIS
+			
+			SI premier=1 ALORS 
+				premier<-2	//pour que les tour se passe dans l'ordre
+				SINON
+					premier<-1 
+			FINSI
+				
+				
+	JUSQU'A allumettes=0 
+	//
+	
+	ECRIRE('Fin de la partie !') 
+	
+FIN.

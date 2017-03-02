@@ -1,0 +1,53 @@
+JEUX DE TEST
+
+allumettes = 21
+perdu=faux
+perduIA=faux
+joueur1=''
+
+procedure PseudoJoueur(joueur1)
+	joueur=John
+on quitte la procedure
+
+premier=2
+
+cas 2
+
+	allumette >0 on entre dans le si
+		procedure TourIA(21,faux)
+			
+			NbrRetire=3
+			allumettes=21-3
+			allumettes=18
+			
+		on quitte la procedure
+	on quitte le si
+	
+	premier=2 on entre dans le sinon
+		premier=1
+	
+on quitte le cas parmis
+
+allumette<>0 on continue la boucle
+
+cas 1
+	
+	allumettes>0 on entre dans le si
+		procedure TourJoueurs(John,18,faux)
+			
+			NbrRetire=2
+			allumettes=18-2
+			allumettes=16
+		on quitte la procedure
+	on quitte le si
+	
+	premier=1 on entre dans le si
+		premier=2
+on qutte le cas parmis
+
+allumettes<>0 on continue la boucle 
+
+....
+
+
+

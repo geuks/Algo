@@ -1,0 +1,321 @@
+//BUT:Le jeu du pendu consiste à trouver un mot caché, dont on connaît initialement le nombre de lettres. 
+//ENTREE:1 chaine 1 caractere
+//SORTIE:1 chaine 1 booleen
+programPFINu 
+
+
+//BUT:Affiche les partie du pendu
+//ENTREE:3 entier
+//SORTIE:affichage
+PROCEDURE AffichagePendu(erreur:INTEGER) 
+var
+	i,j:INTEGER 
+DEBUT
+
+	CAS erreur PARMIS
+		CAS 1:DEBUT		//poteau bas
+						PositionEcran(60,28) 
+						ECRIRE('_____') 
+					FINCAS
+		
+		CAS 2:DEBUT//poteau
+						POUR i<-10 A 28 FAIRE
+							PositionEcran(62,i) 
+							ECRIRE('|') 
+						FINPOUR
+					FINCAS
+		
+		CAS 3:DEBUT//poteau haut
+				POUR i<-62 A 72 FAIRE
+					PositionEcran(i,9) 
+					ECRIRE('_') 
+				FINPOUR 
+			FINCAS
+		
+		CAS 4:DEBUT//corde
+				POUR i<-10 A 13 FAIRE
+					PositionEcran(72,i) 
+					ECRIRE('|') 
+				FINPOUR
+			FINCAS
+		
+		CAS 5:DEBUT//tete
+				POUR i<-14 A 18 FAIRE
+					PositionEcran(69,i) 
+					ECRIRE('|') 
+					PositionEcran(75,i) 
+					ECRIRE('|') 
+				FINPOUR
+				
+				POUR i<-70 A 74 FAIRE
+						SI i<>72 ALORS
+							PositionEcran(i,13) 
+							ECRIRE('_') 
+						FINSI
+						PositionEcran(i,18) 
+						ECRIRE('_') 
+				FINPOUR
+			FINCAS
+		
+		CAS 6:DEBUT//corp
+						POUR i<-19 A 24 FAIRE
+						DEBUT
+							PositionEcran(72,i) 
+							ECRIRE('|') 
+						FIN 
+					FINCAS
+		
+		CAS 7:DEBUT//bras gauche
+						POUR i<-67 A 71 FAIRE
+							PositionEcran(i,20) 
+							ECRIRE('_') 
+						FINPOUR
+						
+						PositionEcran(66,20) 
+						ECRIRE('#') 
+					FINCAS
+		
+		CAS 8:DEBUT//bras droit
+						POUR i<-73 A 77 FAIRE
+							PositionEcran(i,20) 
+							ECRIRE('_') 
+						FINPOUR
+						
+						PositionEcran(78,20) 
+						ECRIRE('#') 
+					FINCAS
+		
+		CAS 9:DEBUT//jambe gauche
+						POUR i<-70 A 71 FAIRE
+							PositionEcran(i,24) 
+							ECRIRE('_') 
+						FINPOUR
+						
+						POUR i<-25 A 27 FAIRE
+							PositionEcran(69,i) 
+							ECRIRE('|') 
+						FINPOUR
+						
+						PositionEcran(68,27) 
+						ECRIRE('_') 
+					FINCAS
+		
+		CAS 10:DEBUT//jambe droite
+						POUR i<-73 A 74 FAIRE
+							PositionEcran(i,24) 
+							ECRIRE('_') 
+						FINPOUR
+						
+						POUR i<-25 A 27 FAIRE
+							PositionEcran(75,i) 
+							ECRIRE('|') 
+						FINPOUR
+						
+						PositionEcran(76,27) 
+						ECRIRE('_') 
+					FINCAS
+		
+		CAS 11:DEBUT//visage
+		
+						PositionEcran(71,15) 
+						ECRIRE('X') 
+						
+						PositionEcran(73,15) 
+						ECRIRE('X')
+						
+						PositionEcran(72,16) 
+						ECRIRE(Chr(30)) 
+						
+						POUR i<-71 A 73 FAIRE
+							PositionEcran(i,17) 
+							ECRIRE('_')
+						FINPOUR
+					FINCAS
+	FINCASPARMIS
+
+FINPROCEDURE
+//
+
+
+//BUT:Le mot que l'utilisateur veut faire deviner
+//ENTREE:2 chaine 1 entier
+//SORTIE:2 chaine
+PROCEDURE EntreeMot(var mot,trouve:CHAINE) 
+var
+	i:INTEGER 
+DEBUT
+
+	REPETER
+		ECRIRE('Entrez le mot que vous voulez faire deviner') 
+		ECRIRE('3 a 12 caracteres maximum.') 
+		ECRIRE('- ') 
+	
+		LIRE(mot) 
+		mot<-UpCAS(mot) 
+		SI (LONGUEUR(mot)<2) OU (LONGUEUR(mot)>13) OU (mot='') OU (mot<Chr(65)) OU (mot>Chr(90)) ALORS
+			ECRIRE('Erreur')  
+		FINSI 
+	JUSQU'A (LONGUEUR(mot)>2) ET (LONGUEUR(mot)<13) ET (mot<>'') ET (mot>Chr(64)) ET (mot<Chr(91)) 
+	
+	trouve<-mot 
+	
+	POUR i<-1 A LONGUEUR(trouve) FAIRE
+		trouve[i]<-'_' 
+	FINPOUR
+
+FINPROCEDURE
+//
+
+
+//BUT:permet d'effacer le text a gauche de lecran
+//ENTREE:2 entier
+//SORTIE:text effacer
+PROCEDURE clrtxt () 
+var
+	i,j:INTEGER 
+DEBUT
+
+	POUR i<-1 A 10 FAIRE
+		POUR j<-1 A 40 FAIRE
+			PositionEcran(j,i) 
+			ECRIRE(' ') 
+		FINPOUR 
+	FINPOUR
+
+FINPROCEDURE
+//
+
+
+//BUT:La lettre que l'utilisateur veut tester
+//ENTREE:1 caractere
+//SORTIE:1 caractere
+PROCEDURE EntreeLettre(var lettre:CARACTERE) 
+DEBUT
+	REPETER
+		ECRIRE('Entrez une lettre') 
+		ECRIRE('- ') 
+		LIRE(lettre) 
+		lettre<-UpCAS(lettre) 
+		SI (lettre<Chr(65)) OU (lettre>Chr(90)) OU (lettre='') ALORS
+			ECRIRE('Erreur') 
+		FINSI
+	JUSQU'A (lettre>Chr(64)) ET (lettre<Chr(91)) ET (lettre<>'') 
+	
+FINPROCEDURE
+//
+
+
+//BUT:Affiche le nombre de lettre restante et trouver par l'utilisateur
+//ENTREE:1 entier 1 chaine
+//SORTIE:affichage
+PROCEDURE AffichageMotTrouve (trouve:CHAINE) 
+var
+	i:INTEGER 
+DEBUT
+	
+	POUR i<-1 A LONGUEUR(trouve) FAIRE
+		ECRIRE(trouve[i],' ') 
+	FINPOUR
+
+FINPROCEDURE
+//
+
+
+//BUT:Test de la lettre si elle est dans le mot a trouvé
+//ENTREE:1 caractere 2 chaine 1 entier 1 booleen
+//SORTIE:1 booleen 1 chaine
+FONCTION TestLettre(lettre:CARACTERE; mot:CHAINE; var trouve:CHAINE):BOOLEEN 
+var
+	i:INTEGER 
+  test:BOOLEEN 
+DEBUT
+	
+	test<-faux 
+	
+	POUR i<-1 A LONGUEUR(mot) FAIRE
+		SI lettre=mot[i] ALORS
+			trouve[i]<-mot[i] 
+			test<-vrai 
+		FINSI
+	FINPOUR
+
+	TestLettre<-test 
+
+FINFONCTION
+//
+
+
+//Programme Principal
+var
+	erreur,i:INTEGER 
+	mot,trouve:CHAINE //mot = mot a trouve   trouve = nombre de lettre que lutilisateur a trouver
+	lettre:CARACTERE 
+  test:BOOLEEN 
+DEBUT
+
+	erreur<-0 
+
+	//PARTIE PRESENTATION DU JEU A L'UTILISATEUR
+	ECRIRE('Bonjour et bienvenue dans le jeu du pendu !') 
+	ECRIRE('Le but est de trouver le mot caché en indiquant lettre par lettre') 
+	ECRIRE('et en se trompant un minimum de fois,') 
+	ECRIRE('en sachant que le nombre d''erreur maximum est 11')  
+
+	ECRIRE('Voici le pendu :') 
+
+	//affichage du pendu en entier
+	POUR i<-1 A 11 FAIRE
+		AffichagePendu(i) 
+	FINPOUR
+	//fin affichage
+
+	PositionEcran(1,6) 
+	ECRIRE('Bonne chance !  ') 
+
+	ECRIRE('Patientez.... Le jeu va demarrer') 
+	//FIN PRESENTATION
+
+
+	//utilisateur entre le mot a deviner
+	EntreeMot(mot,trouve) 
+	//
+
+	//Boucle de tour de jeu
+	REPETER
+		clrtxt //PROCEDURE qui permet deffacer juste le texte a gauche
+		PositionEcran(1,1) 
+		ECRIRE('Vous avez ',erreur,' erreur(s)') 
+		ECRIRE('Le mot est : ') 
+		AffichageMotTrouve(trouve) //on affiche le mot a trouvé avec des '_'
+
+		
+		EntreeLettre(lettre) 
+		//on test si la lettre est bien dans le mot
+		Test<-TestLettre(lettre,mot,trouve) 
+		
+		SI test=vrai ALORS
+			ECRIRE('Bravo vous avez trouver !')  
+			SINON
+				ECRIRE('Desole vous n''avez pas trouver!') 
+				erreur<-erreur+1 
+				AffichagePendu(erreur) //on affiche une partie du pendu si la lettre est pas dans le mot
+			FINSI
+		FINSI
+	JUSQU'A (mot=trouve) OU (erreur=11) 
+	
+	clrtxt 
+	
+	PositionEcran(1,1) 
+	
+	SI erreur=11 ALORS
+		ECRIRE('Vous avez ete pendu !')
+		SINON
+			ECRIRE('Bravo !') 
+		FINSI
+	FINSI
+	
+	ECRIRE('Le mot etait :',mot) 
+	ECRIRE('Merci d''avoir jouer !') 
+	ECRIRE('Developper par Geuks.') 
+	 
+FIN.

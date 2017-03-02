@@ -1,0 +1,21 @@
+JEUX DE TEST
+
+erreur=0
+
+EntreeMot=johnyves
+
+trouve=_ _ _ _ _ _ _ _
+
+lettre=o
+
+test=vrai
+
+....
+
+lettre=n
+
+test=faux
+
+erreur=1
+
+....

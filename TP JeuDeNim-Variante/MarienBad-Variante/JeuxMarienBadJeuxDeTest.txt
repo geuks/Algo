@@ -1,0 +1,72 @@
+JEUX DE TEST
+
+joueur1= John
+joueur2= Yves
+
+procedure initallumettes(allumette)
+	cpt=0
+	allumettes[1]=1+0
+
+	cpt=2
+	allumettes[2]=1+2
+	allumettes[2]=3
+
+	cpt=4
+	allumettes[3]=1+4
+	allumettes[3]=5
+
+	cpt=6
+	allumettes[4]=1+6
+	allumettes[4]=7
+on quitte la procedure
+
+
+on entre dans la boucle
+
+	test=faux on entre dans le si
+	
+		procedure TourJoueur(John,allumette)
+			
+			y=2
+			x=3
+			
+			allumettes[2]=3-3
+		on quitte la procedure
+		
+	on quitte le si
+	
+	test= fonction TestFin(allumettes)
+		
+		allumettes[1]<>0
+		allumettes[2]=0
+		allumettes[3]<>0
+		allumettes[4]<>0
+		
+		test= faux
+	on quitte la fonction
+	
+	test=faux on entre dans le si
+	
+		procedure TourJoueur(Yves,allumette)
+			
+			y=3
+			x=2
+			
+			allumettes[2]=5-2
+		on quitte la procedure
+		
+	on quitte le si
+	
+	test= fonction TestFin(allumettes)
+		
+		allumettes[1]<>0
+		allumettes[2]=0
+		allumettes[3]<>0
+		allumettes[4]<>0
+		
+		test= faux
+	on quitte la fonction
+	
+......
+
+
