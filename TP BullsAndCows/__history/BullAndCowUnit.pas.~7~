@@ -1,0 +1,412 @@
+{***************************BUT****PRINCIPAL****************************************
+  *
+   *_CREATEUR:UNALAN Gökhan
+   *
+   *______BUT:Jeu de Bull & Cows
+   *           L'utilisateur entre un mot (chaine) et doit trouver le mot caché.
+   *           Bulls=Code correct et à la bonne position.
+   *           Cows=Code correct mais à la mauvaise position.
+   *
+   *___ENTREE:L'utilisateur entre un mot (chaine).
+   * 
+   *___SORTIE:Une fois le nombre de faute atteint ou que l'utilisateur trouve le mot,
+   *           il gagne ou perd la partie, il peut recommencer ou quitter.
+  *
+***********************************************************************************}
+unit BullAndCowUnit;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.UITypes, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Imaging.jpeg,
+  Vcl.ExtCtrls;
+  
+type
+  TFBullsCows = class(TForm)
+  
+    EMot: TEdit;  //partie ou l'utilisateur entre le mot
+    EBulls: TEdit; //affiche le nbr de bulls
+    ECows: TEdit;  //affiche le nbr de cows
+    EFaute: TEdit; //affiche le nbr de faute de l'utilisateur
+    EEssai: TEdit; //affiche le nbr de faute MAX
+
+    //Remplace le Label, aide pour l'interface
+    PMot: TPanel;
+    PBulls: TPanel;
+    PCows: TPanel;
+    PFaute: TPanel;
+    PEssai: TPanel;
+    PText: TPanel;
+    PTaille: TPanel;
+    
+    BCheck: TButton;  //vérifie si l'utilisateur à trouver le mot
+    BRestart: TButton;  //relance la partie
+    BQuit: TButton;   //quitte l'application
+    BRegle: TButton;  //affiche les régles du jeu
+    
+    MDictionnaire: TMemo; //memo pour stocker la biblioteque
+    TText: TTimer;  //timer pour effacer le message (5sc)
+
+    IFond: TImage;
+    MHistorique: TMemo;  //image de fond
+    
+    procedure BQuitClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure BCheckClick(Sender: TObject);
+    procedure TTextTimer(Sender: TObject);
+    procedure BRestartClick(Sender: TObject);
+    procedure redemarreCpt();
+    procedure BRegleClick(Sender: TObject);
+  private
+    { Déclarations privées }
+    mot:string;//Le mot à trouvé
+    nbrFaute:integer;//Nbr de faute max
+    faute:integer;//Nbr de faute du joueur
+  public
+    { Déclarations publiques }
+  end;
+
+  var
+  FBullsCows: TFBullsCows;
+
+implementation
+
+{$R *.dfm}
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:Redemarre et réinitialise le timer.
+	 *__ENTREE:1 timer 
+	 *__SORTIE:le timer est réinitialiser
+*********************************************************************************}
+procedure TFBullsCows.redemarreCpt();
+begin
+  if TText.Enabled=true then  //si le timer est activé
+  begin
+    TText.Enabled:=false;  //désactive
+    TText.Enabled:=true;   //réactive
+  end
+  else
+    TText.Enabled:=true;    //si il n'est pas activé alors on l'active
+end;
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:Renvoie une valeur en fonction de la longueur du mot donné en paramètre.
+	 *__ENTREE:1 chaine en parametre et 1 entier en local. 
+	 *__SORTIE:Renvoie 1 entier
+*********************************************************************************}
+function calcFaute(mot:string):integer;
+var
+  nbr:integer;//variable de stockage
+begin
+  nbr:=0;
+  case Length(mot) of
+    3:nbr:=4;
+    4:nbr:=7;
+    5:nbr:=10;
+    6:nbr:=16;
+    7:nbr:=20;
+    8:nbr:=24;
+    9:nbr:=27;
+  end;
+
+  calcFaute:=nbr;
+end;
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:Vérifie si le mot donné en paramètre ne contient que des minuscule, 
+   *          et renvoie un booléen. 
+	 *__ENTREE:1 chaine en paramètre, 1 entier et 1 booléen en local.
+	 *__SORTIE:Renvoie 1 booléen.
+*********************************************************************************}
+function testMin(mot:string):boolean;
+var
+  i: Integer;//boucle
+  test:boolean;//variable de stockage
+begin
+  test:=true;
+  for i := 1 to Length(mot) do
+    if (mot[i]<'a') OR (mot[i]>'z') then
+      test:=false;
+  testMin:=test;
+end;
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:Renvoie le nombre de bulls dans une chaine donnée 
+   *          en paramètre avec une autre. 
+	 *__ENTREE:2 chaine en paramètre, 2 entier en local 
+	 *__SORTIE:Renvoie 1 entier
+*********************************************************************************}
+function nbrBulls(mEntree,mFinal:string):integer;
+var
+  i:integer;  //boucle
+  cpt: Integer; //compteur de bulls
+begin
+  cpt:=0;
+  for i := 1 to Length(mEntree) do
+    if mEntree[i]=mFinal[i] then
+      inc(cpt);
+  nbrBulls:=cpt;
+end;
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:Renvoie le nombre de cows dans une chaine donnée 
+   *          en paramètre avec une autre. 
+	 *__ENTREE:2 chaine en paramètre, 3 entier en local 
+	 *__SORTIE:Renvoie 1 entier
+*********************************************************************************}
+function nbrCows(mEntree,mFinal:string):integer;
+var
+  i,j:integer;  //boucle
+  cpt:integer;  //compteur de cows
+begin
+  cpt:=0;
+  for i := 1 to Length(mEntree) do
+    for j := 1 to Length(mEntree) do
+      if (mEntree[i]=mFinal[j]) AND (i<>j) then
+        inc(cpt);
+  nbrCows:=cpt;
+end;
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:Verifie si une chaine est dans un memo 
+	 *__ENTREE:1 chaine et 1 TMemo en parametre, 1 entier et 1 boolean en local 
+	 *__SORTIE:Renvoie 1 booleen
+*********************************************************************************}
+function testExiste(mEntree:string; MHistorique:TMemo):boolean;
+var
+  i: Integer;//boucle
+  test:boolean;//variable de stockage
+begin
+  test:=false;
+  for i := 0 to MHistorique.Lines.Count-1 do
+    if mEntree=MHistorique.Lines[i] then
+      test:=true;
+  testExiste:=test;
+end;
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:Verifie si dans une chaine il y a la même lettre 
+	 *__ENTREE:1 chaine en parametre, 2 entier et 1 booleen en local 
+	 *__SORTIE:Renvoie 1 booleen
+*********************************************************************************}
+function testMemeLettre(mEntree:string):boolean;
+var
+  i,j:integer;//boucle
+  test:boolean;//variable de stockage
+begin
+  for i := 1 to Length(mEntree) do
+    for j := 1 to Length(mEntree) do
+      if (mEntree[i]=mEntree[j]) AND (i<>j) then
+        test:=true;
+  testMemeLettre:=test;
+end;
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:Au clique du bouton Check (BCheck) 
+	 *__ENTREE:1 TObject en paramètre, 2 chaine et 2 entier en locale 
+	 *__SORTIE:Affiche si l'utilisateur à gagner, perdu, ou qu'il a fait une erreur.
+*********************************************************************************}
+procedure TFBullsCows.BCheckClick(Sender: TObject);
+var
+  mEntree:string; //mot entrée par l'utilisateur
+  mFinal:string;  //mot à trouver
+  bulls,cows:integer; //Nbr de bulls/cows
+begin
+  mFinal:=mot;  //on affecte le mot à trouver
+  mEntree:=EMot.Text; //on affecte le mot entrée par l'utilisateur
+
+  //si la longueur du mot est la même que le mot à trouver
+  if Length(mEntree)=Length(mot) then
+  begin
+    //Si toute les lettres sont minuscule
+    if testMin(mEntree)=true then
+    begin
+      //Si il n'y a pas 2 fois la même lettre dans le mot tapper
+      if testMemeLettre(mEntree)=false then
+      begin
+        //Si le mot entré n'a pas été tapper
+        if testExiste(mEntree,MHistorique)=false then
+        begin
+          bulls:=nbrBulls(mEntree,mFinal);  //calcul le nbr de bulls
+          cows:=nbrCows(mEntree,mFinal);    //calcul le nbr de cows
+
+          //affiche le resultat à l'écran
+          EBulls.Text:=inttostr(bulls);
+          ECows.Text:=inttostr(cows);
+
+          if (bulls=Length(mot)) then //GAGNE
+          begin
+            PText.Caption:='Bravo ! Le mot était bien '+mot+'.';
+            BRestartClick(Sender);  //On force le restart en appelant la procédure
+          end
+          else
+            if (faute=nbrFaute) then //PERDU
+            begin
+              PText.Caption:='Perdu ! Le mot était '+mot+'.';
+              BRestartClick(Sender);  //On force le restart en appelant la procédure
+            end
+            else  //FAUTE
+            begin
+              inc(faute); //incrémente la variable
+              //affiche à l'écran
+              PText.Caption:='C''est votre '+inttostr(faute)+' essai(s).';
+              redemarreCpt; //Redemarre le compteur
+              //ajoute le mot dans le memo
+              MHistorique.Lines.Add(EMot.Text);
+              {permet d'avoir la scroll bar toujours en bas pour que l'utilisateur 
+                puisse voir le dernier mot}
+              SendMessage(MHistorique.Handle,WM_VSCROLL,SB_BOTTOM,0);
+            end;
+        end
+        //Sinon le mot à était tapper
+        else
+        begin
+          redemarreCpt; //Redemarre le compteur
+          PText.Caption:='Vous avez déjà écrit ce mot.';
+        end;
+      end
+      //Sinon le mot à au minimum 2 fois la meme lettre
+      else
+      begin
+        redemarreCpt; //Redemarre le compteur
+        PText.Caption:='Il ne peut y avoir 2 fois la même lettre.';
+      end;
+    end
+    //Sinon les lettres ne sont pas minuscule
+    else
+    begin
+      redemarreCpt; //Redemarre le compteur
+      PText.Caption:='Erreur, le mot doit être en minuscule.';
+    end;
+  end
+  //Sinon le mot entrée ne fait pas la même taille que le mot
+  else
+  begin
+    redemarreCpt; //Redemarre le compteur 
+    PText.Caption:='Erreur, le mot doit faire '+inttostr(Length(mot))+' lettres.';
+  end;
+
+  //Affiche à l'écran
+  EFaute.Text:=inttostr(faute);
+  EEssai.Text:=inttostr(nbrFaute);
+
+  EMot.SetFocus;
+end;
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:Au clique du bouton Quit (BQuit) 
+	 *__ENTREE:1 TObject en paramètre 
+	 *__SORTIE:Affiche un message dialog qui permet à l'utilisateur de quitter.
+*********************************************************************************}
+procedure TFBullsCows.BQuitClick(Sender: TObject);
+begin
+  if MessageDlg('Voulez-vous vraiment quitter?',
+    mtConfirmation, [mbYes, mbNo], 0, mbYes) = mrYes then Close;
+end;
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:Au clique du bouton Régle (BRegle) 
+	 *__ENTREE:1 TObject en paramètre 
+	 *__SORTIE:Affiche un message dialog qui permet de lire les régles
+*********************************************************************************}
+procedure TFBullsCows.BRegleClick(Sender: TObject);
+begin
+  redemarreCpt;
+  MessageDlg('Découvre le code caché !' +#13#10+ 'Bulls=Code correct et à la bonne position.' +
+                 #13#10+'Cows=Code correct mais à la mauvaise position.', 
+                 mtInformation,[mbOk], 0, mbOk);
+end;
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:Au clique du bouton Restart (BRestart) 
+	 *__ENTREE:1 TObject en paramètre 
+	 *__SORTIE:Affiche un message dialog qui permet à l'utilisateur de recommencer la partie
+*********************************************************************************}
+procedure TFBullsCows.BRestartClick(Sender: TObject);
+begin
+  if MessageDlg('Voulez-vous recommencer?',
+    mtConfirmation, [mbYes, mbNo], 0, mbYes) = mrYes then
+  begin
+    //Si l'utilisateur clique sur oui, on réinitialise les valeurs des variables
+    faute:=0;
+    mot:=MDictionnaire.Lines[Random(MDictionnaire.Lines.Count-1)];
+    nbrFaute:=calcFaute(mot);
+    MHistorique.Text:='';
+
+    //Affiche à l'écran
+    EBulls.Text:='0';
+    ECows.Text:='0';
+    EFaute.Text:=inttostr(faute);
+    EEssai.Text:=inttostr(nbrFaute);
+    EMot.Text:='';
+    PTaille.Caption:='Taille: '+inttostr(Length(mot));
+    PText.Caption:='';
+    PText.Caption:='Nouvelle Partie.';
+
+    EMot.SetFocus;
+    //Redemarre le compteur
+    redemarreCpt;
+  end
+end;
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:A la création de l'application 
+	 *__ENTREE:1 TObject en paramètre
+	 *__SORTIE:initialise les valeurs des variables / objets
+*********************************************************************************}
+procedure TFBullsCows.FormCreate(Sender: TObject);
+begin
+  //initialise les valeurs des variables
+  faute:=0;
+  nbrFaute:=0;
+
+  //charge la bibliotèque dans un memo
+  MDictionnaire.Lines.LoadFromFile('Dictionnaire.txt');
+  //Récupère un mot aléatoire du memo
+  mot:=MDictionnaire.Lines[Random(MDictionnaire.Lines.Count-1)];
+  //Calcule le nbr de faute que l'utilisateur pourra faire
+  nbrFaute:=calcFaute(mot);
+  //affiche à l'écran
+  EEssai.Text:=inttostr(nbrFaute);
+  PTaille.Caption:='Taille: '+inttostr(Length(mot));
+end;
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:Un timer qui au bout de 5 sc réinitialise une valeur 
+	 *__ENTREE:1 TObject 
+	 *__SORTIE:Réinitialise une valeur
+*********************************************************************************}
+procedure TFBullsCows.TTextTimer(Sender: TObject);
+begin
+  PText.Caption:='';
+  TText.Enabled:=false;
+end;
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+//**************************FIN****PRINCIPAL****************************************
+end.

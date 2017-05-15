@@ -1,0 +1,251 @@
+unit BullAndCowUnit;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.UITypes, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Imaging.jpeg,
+  Vcl.ExtCtrls;
+
+type
+  TFBullsCows = class(TForm)
+    EMot: TEdit;
+    IFond: TImage;
+    EBulls: TEdit;
+    ECows: TEdit;
+    EFaute: TEdit;
+    BCheck: TButton;
+    BRestart: TButton;
+    BQuit: TButton;
+    PMot: TPanel;
+    PBulls: TPanel;
+    PCows: TPanel;
+    PFaute: TPanel;
+    PText: TPanel;
+    PTaille: TPanel;
+    MDictionnaire: TMemo;
+    Label1: TLabel;
+    TText: TTimer;
+    PEssai: TPanel;
+    EEssai: TEdit;
+    BRegle: TButton;
+    procedure BQuitClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure BCheckClick(Sender: TObject);
+    procedure TTextTimer(Sender: TObject);
+    procedure BRestartClick(Sender: TObject);
+    procedure redemarreCpt();
+    procedure BRegleClick(Sender: TObject);
+  private
+    { Déclarations privées }
+    mot:string;
+    nbrFaute,faute:integer;
+  public
+    { Déclarations publiques }
+  end;
+
+var
+  FBullsCows: TFBullsCows;
+
+implementation
+
+{$R *.dfm}
+
+procedure TFBullsCows.redemarreCpt();
+begin
+  if TText.Enabled=true then
+  begin
+    TText.Enabled:=false;
+    TText.Enabled:=true;
+  end
+  else
+    TText.Enabled:=true;
+end;
+
+function calcFaute(mot:string):integer;
+var
+  nbr:integer;
+begin
+  nbr:=0;
+  case Length(mot) of
+    3:nbr:=4;
+    4:nbr:=7;
+    5:nbr:=10;
+    6:nbr:=16;
+    7:nbr:=20;
+    8:nbr:=24;
+    9:nbr:=27;
+  end;
+
+  calcFaute:=nbr;
+end;
+
+
+function testMin(mot:string):boolean;
+var
+  i: Integer;
+  test:boolean;
+begin
+  test:=true;
+  for i := 1 to Length(mot) do
+    if (mot[i]<'a') OR (mot[i]>'z') then
+      test:=false;
+  testMin:=test;
+end;
+
+
+function nbrBulls(mEntree,mFinal:string):integer;
+var
+  i,cpt: Integer;
+begin
+  cpt:=0;
+  for i := 1 to Length(mEntree) do
+    if mEntree[i]=mFinal[i] then
+      inc(cpt);
+  nbrBulls:=cpt;
+end;
+
+
+function nbrCows(mEntree,mFinal:string):integer;
+var
+  i,j,cpt:integer;
+begin
+  cpt:=0;
+  for i := 1 to Length(mEntree) do
+    for j := 1 to Length(mEntree) do
+      if (mEntree[i]=mFinal[j]) AND (i<>j) then
+        inc(cpt);
+  nbrCows:=cpt;
+end;
+
+
+procedure TFBullsCows.BCheckClick(Sender: TObject);
+var
+  mEntree,mFinal:string;
+  bulls,cows:integer;
+begin
+  mFinal:=mot;
+  mEntree:=EMot.Text;
+
+  if Length(mEntree)=Length(mot) then
+  begin
+    if testMin(mEntree)=true then
+    begin
+
+      bulls:=nbrBulls(mEntree,mFinal);
+      cows:=nbrCows(mEntree,mFinal);
+
+      EBulls.Text:=inttostr(bulls);
+      ECows.Text:=inttostr(cows);
+
+      if (bulls=Length(mot)) then
+      begin
+        PText.Caption:='Bravo ! Le mot était bien '+mot+'.';
+        BRestartClick(Sender);
+      end
+      else
+        if (faute=nbrFaute) then
+          PText.Caption:='Perdu ! Le mot était '+mot+'.'
+        else
+        begin
+          inc(faute);
+          //Redemarre le compteur
+          redemarreCpt;
+          PText.Caption:='C''est votre '+inttostr(faute)+' essai(s).';
+        end;
+    end
+    else
+    begin
+      //Redemarre le compteur
+      redemarreCpt;
+      PText.Caption:='Erreur, le mot doit être en minuscule.';
+    end;
+  end
+  else
+  begin
+    //Redemarre le compteur
+    redemarreCpt; 
+    PText.Caption:='Erreur, le mot doit faire '+inttostr(Length(mot))+' lettres.';
+  end;
+
+  EFaute.Text:=inttostr(faute);
+  EEssai.Text:=inttostr(nbrFaute);
+
+  EMot.SetFocus;
+end;
+
+
+procedure TFBullsCows.BQuitClick(Sender: TObject);
+begin
+  if MessageDlg('Voulez-vous vraiment quitter?',
+    mtConfirmation, [mbYes, mbNo], 0, mbYes) = mrYes then Close;
+end;
+
+
+procedure TFBullsCows.BRegleClick(Sender: TObject);
+begin
+  redemarreCpt;
+  PText.Caption:='Découvre le code caché ! Bulls=Code correct et à la bonne position' +
+                 ' Cows=Code correct mais à la mauvaise position.';
+end;
+
+procedure TFBullsCows.BRestartClick(Sender: TObject);
+begin
+  if MessageDlg('Voulez-vous recommencer?',
+    mtConfirmation, [mbYes, mbNo], 0, mbYes) = mrYes then
+  begin
+    faute:=0;
+    mot:=MDictionnaire.Lines[Random(MDictionnaire.Lines.Count-1)];
+    nbrFaute:=calcFaute(mot);
+
+    EBulls.Text:='0';
+    ECows.Text:='0';
+
+    EFaute.Text:=inttostr(faute);
+    EEssai.Text:=inttostr(nbrFaute);
+
+    EMot.Text:='';
+    EMot.SetFocus;
+
+    PTaille.Caption:=inttostr(Length(mot));
+    PText.Caption:='';
+    PText.Caption:='Nouvelle Partie.';
+
+    //Redemarre le compteur
+    redemarreCpt;
+
+    //test
+    Label1.Caption:=mot;
+  end
+  else
+    close();
+end;
+
+
+procedure TFBullsCows.FormCreate(Sender: TObject);
+begin
+  faute:=0;
+  nbrFaute:=0;
+
+  MDictionnaire.Lines.LoadFromFile('Dictionnaire.txt');
+
+  mot:=MDictionnaire.Lines[Random(MDictionnaire.Lines.Count-1)];
+
+  //test
+  Label1.Caption:=mot;
+
+  PTaille.Caption:='Taille: '+inttostr(Length(mot));
+
+  nbrFaute:=calcFaute(mot);
+
+  EEssai.Text:=inttostr(nbrFaute);
+
+end;
+
+procedure TFBullsCows.TTextTimer(Sender: TObject);
+begin
+  PText.Caption:='';
+  TText.Enabled:=false;
+end;
+
+end.
