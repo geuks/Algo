@@ -1,0 +1,210 @@
+{***************************BUT****PRINCIPAL****************************************
+	*
+	 *_CREATEUR:UNALAN Gökhan
+	 *
+	 *______BUT:Programme qui conjugues et créer les verbes 1er/2eme/3eme groupe dans un autre fichier
+	 *
+	 *___ENTREE:un fichier avec differents verbes
+	 *
+	 *___SORTIE:crér un fichier avec les verbes conjugué
+	 *
+	*
+***********************************************************************************}
+Algorithme ALGOTP1_FICHIERS_F1B_UNALAN_GOKHAN
+
+CONST
+	VERBES:"RIRE,RECEVOIR,ALLER,BOUILLIR,ENVOYER,PEINDRE,HABITER,PAYER,MOURIR,HAIR,VOULOIR,FINIR,S''AMUSER"
+
+TYPE
+	groupe=(isok,premier,deuzieme,troizieme)
+TYPE
+	tVerbe=TABLEAU [1..50] DE CHAINE
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT: affiche a l'écran les donnée d'un fichier
+	 *__ENTREE: 1 fichier type Text, 1 chaine en parametre et 1 chaine en local
+	 *__SORTIE:fichier afficher à l'écran
+*********************************************************************************}
+PROCEDURE afficher_fichier(var fichier:Text; chemin:string)
+VAR
+	nom:CHAINE
+DEBUT
+	nom<-" ";
+	ASSIGNER(fichier,chemin)
+	OUVRIR(fichier)
+	
+	TANTQUE NON EoF(fichier) FAIRE
+		LIRE(fichier,nom)
+		ECRIRE(nom)
+	FINTANTQUE
+	
+	FERMER(fichier)
+FINPROCEDURE
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT: créer un fichier avec le nombre de verbes à l'interieur
+	 *__ENTREE: 1 fichier type Text, 1 chaine , 1 entier et 1 type tVerbe en parametre
+	*					1 chaine et 1 entier en local
+	 *__SORTIE:fichier créer avec les verbes
+*********************************************************************************}
+PROCEDURE create_fichier(VAR fichier:Text; chemin:CHAINE; VAR nbrVerbe:ENTIER; VAR listVerbe:tVerbe)
+VAR
+	verbe:CHAINE
+	i:ENTIER
+DEBUT
+	verbe<-" "
+	nbrVerbe<-1
+	
+	ASSIGNER(fichier,chemin)
+	REECRIRE(fichier)
+	
+	POUR i<-1 A LONGUEUR(VERBES) FAIRE
+		SI VERBES[i]<>"," ALORS
+			verbe<-verbe+VERBES[i]
+		FINSI
+		SINON
+			ECRIRE(fichier,verbe)
+			listVerbe[nbrVerbe]<-verbe
+			verbe<-" "
+			nbrVerbe<-nbrVerbe+1
+		FINSINONSI
+	FINPOUR
+	
+	FERMER(fichier)
+FINPROCEDURE
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT: determine le groupe d'un verbe
+	 *__ENTREE: 1 chaine en parametre et 1 chaine, 1 entier, 1 type groupe en local
+	 *__SORTIE:1 type groupe
+*********************************************************************************}
+FONCTION groupe_verbe(verbe:CHAINE):groupe
+VAR
+	terminaison:CHAINE
+	lgch:ENTIER
+	test:groupe
+DEBUT
+
+	test<-isok
+	verbe<-MINUSCULE(verbe)
+	lgch<-LONGUEUR(verbe)
+	terminaison<EXTRACTION(verbe,lgch-1,lgch)
+	
+	SI (terminaison="er") ET (verbe<>"aller") ALORS
+		test<-premier
+	FINSI
+	SINON
+		SI (terminaison="ir") ET (verbe<>"mourir") ET (verbe<>"recevoir") ALORS
+			test<-deuzieme
+		FINSINONSI
+		SINON
+			test<-troizieme
+		FINSI
+	groupe_verbe<-test
+	
+FINFONCTION
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT: ecrit dans un fichier le verbe du premier groupe conjugué
+	 *__ENTREE: 1 fichier type text en parametre, 1 entier et 2 chaine en local
+	 *__SORTIE:ecrit dans le fichier le verbe conjugué
+*********************************************************************************}
+PROCEDURE ecrit_premier(VAR fichier:Text; chemin,verbe:CHAINE)
+VAR
+	lgch:ENTIER
+	terminaison,radical:CHAINE
+DEBUT
+	verbe<-MINUSCULE(verbe)
+	lgch<-LONGUEUR(verbe)
+	terminaison<-EXTRACTION(verbe,lgch-1,lgch)
+	radical<-EXTRACTION(verbe,0,lgch-2)
+	
+	ASSIGNER(fichier,chemin)
+	AJOUTER(fichier)
+	
+	SI (verbe<>"aller") ALORS
+		SI (verbe[1]<>"h") ET (verbe[1]<>"e") ALORS
+			ECRIRE(fichier, "je"+radical+"e")
+		FINSI
+		SINON
+			ECRIRE(fichier, "j'"+radical+"e")
+		FINSI
+		
+		ECRIRE(fichier,"tu "+radical+"es")
+		ECRIRE(fichier,"il/elle/on "+radical+"e")
+		ECRIRE(fichier,"nous "+radical+"ons")
+		ECRIRE(fichier,"vous "+radical+"ez");
+		ECRIRE(fichier,"ils "+radical+"ent");
+	FINSI
+	SINON
+		ECRIRE(fichier,"je vais");
+		ECRIRE(fichier,"tu vas");
+		ECRIRE(fichier,"il/elle/on va");
+		ECRIRE(fichier,"nous allons");
+		ECRIRE(fichier,"vous allez");
+		ECRIRE(fichier,"ils vont");
+	FINSI
+	
+	FERMER(fichier)
+FINPROCEDURE
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT: Test tout les verbes et les mets par groupe
+	 *__ENTREE: 1 fichier type Text, 1 entier et 1 tableau tVerbe en parametre
+	 *					1 type groupe, 1 entier et 1 chaine en local
+	 *__SORTIE:
+*********************************************************************************}
+PROCEDURE conjuguer_fichier(VAR fichier2:Text; nbrVerbe:ENTIER; listVerbe:tVerbe)
+VAR
+	grp:groupe
+	i:ENTIER
+	nom:CHAINE
+DEBUT
+	POUR i<-1 A nbrVerbe FAIRE
+		grp<-isok
+		grp<-groupe_verbe(listVerbe[i])
+		
+		CAS grp PARMIS
+			premier: ecrit_premier(fichier2,"verbeconjuguer.txt",listVerbe[i])
+			deuzieme:
+			troizieme:
+		FINCASPARMIS
+	FINPOUR
+FINPROCEDURE
+
+VAR
+	fichier1,fichier2:Text
+	listVerbe:tVerbe
+	choix,nbrVerbe,i:ENTIER
+DEBUT
+	REPETER
+		nbrVerbe<-1
+		
+		create_fichier(fichier1,"verbes.txt",nbrVerbe,listVerbe)
+		
+		ASSIGNER(fichier2,"verbeconjuguer.txt")
+		REECRIRE(fichier2)
+		FERMER(fichier2)
+		
+		ECRIRE("1: Lire Fichier Verbe")
+		ECRIRE("2: Conjuguer le fichier")
+		ECRIRE("3: Afficher le fichier conjuguer")
+		ECRIRE("0: Quitter")
+		
+		LIRE(choix)
+		
+		CAS choix of
+			1:afficher_fichier(fichier1, 'verbes.txt');
+			2:conjuguer_fichier(fichier2,nbrVerbe, listVerbe);
+			3:afficher_fichier(fichier2, 'verbeconjuguer.txt')
+		FINCASPARMIS
+		
+	JUSQUA choix=0
+	
+FIN.
+
+//**************************FIN****PRINCIPAL****************************************
