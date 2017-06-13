@@ -1,0 +1,980 @@
+{***************************BUT****PRINCIPAL****************************************
+	*
+	 *_CREATEUR:UNALAN Gökhan
+	 *
+	 *______BUT:Jeu du morpion, le premier des deux joueurs qui aura une ligne, 
+	 *        colonne avec la meme forme gagnera
+	 *
+	 *___ENTREE:2 joueurs qui choisissent leur cellules
+	 *
+	 *___SORTIE:1 gagnant et 1 perdant ou égalité
+	 *
+	*
+***********************************************************************************}
+//ALGORITHME MORPION
+
+{La fonction POSXY  que j'utilise permet de placer le curseur à l'indice x = horizontal , y=vertical donné en paramètre.
+Elle est relative au point d'origine de la fenêtre qui est en (1,1), en haut à gauche.
+Si l'on recopie cette algorithme en un autre language, le résultat des coordonnées devraient être juste.
+
+La fonction COULEURFOND permet de changer la couleur du fond d'un texte.
+
+La fonction COULEURPOLICE permet de changer la couleur de la police d'écriture.}
+
+CONST
+	TAILLEX=30 //taille x de la grille du jeu
+	TAILLEY=30	//taille y de la grille du jeu
+	DECALAGE=5	//décalage de la grille
+	DECALAGECONSOLEX=41	//décalage de la grille du jeu pour écrire sur la droite
+	DECALAGECONSOLEY=6	//décalage de la hauteur du jeu
+	
+TYPE
+	player=ENREGISTREMENT	//type record pour stocker les infos des joueurs
+		pseudo:CHAINE	//le pseudo
+		manches:ENTIER	//le nombre de manche gagné
+		nbrCoups:TABLEAU [1..9] DE ENTIER	//le nombre de coups joué
+		forme:ENTIER	//rond ou croix
+	FINENREGISTREMENT
+
+TYPE
+	tChar= TABLEAU [1..9] DE CARACTERE	//tableau de caractère pour la grille
+	tJoueur= TABLEAU [1..2] DE player	// tableau du type joueur pour les 2 joueurs
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:afficher la grille d'aide
+	 *__ENTREE:2 entier
+	 *__SORTIE:grille d'aide afficher
+*********************************************************************************}
+PROCEDURE afficherAide()
+VAR
+	x,y:ENTIER
+DEBUT
+	POSXY(42,15)
+	ECRIRE("Numero des cases")
+	COULEURFOND(BLANC)
+	
+	//début affichage par rapport au coordonné x,y de la console
+	POUR y<-16 A 28 FAIRE
+		POUR x<- DECALAGECONSOLEX A DECALAGECONSOLEY+18 FAIRE
+			SI x=DECALAGECONSOLEX ALORS
+				POSXY(x,y)
+				ECRIRE(" ")
+			FINSI
+			SINONSI (x=(18 DIV 3)+DECALAGECONSOLEX) ALORS
+				POSXY(x,y)
+				ECRIRE(" ")
+				SI y=20 ALORS
+					COULEURFOND(NOIR)
+					COULEURPOLICE(ROUGE)
+					POSXY(x-3,y-2)
+					ECRIRE("1")
+					COULEURFOND(BLANC)
+					COULEURPOLICE(BLANC)
+				FINSI
+				SINONSI y=24 ALORS
+					COULEURFOND(NOIR)
+					COULEURPOLICE(ROUGE)
+					POSXY(x-3,y-2)
+					ECRIRE("4")
+					COULEURFOND(BLANC)
+					COULEURPOLICE(BLANC)
+				FINSI
+				SINONSI y=28 ALORS
+					COULEURFOND(NOIR)
+					COULEURPOLICE(ROUGE)
+					POSXY(x-3,y-2)
+					ECRIRE("7")
+					COULEURFOND(BLANC)
+					COULEURPOLICE(BLANC)
+				FINSI
+			SINONSI (x=(18 DIV 3)+((18 DIV 3)+DECALAGECONSOLEX)) ALORS
+				POSXY(x,y)
+				ECRIRE(" ")
+				
+				SI y=20 ALORS
+					COULEURFOND(NOIR)
+					COULEURPOLICE(ROUGE)
+					POSXY(x-3,y-2)
+					ECRIRE("2")
+					COULEURFOND(BLANC)
+					COULEURPOLICE(BLANC)
+				FINSI
+				SINONSI y=24 ALORS
+					COULEURFOND(NOIR)
+					COULEURPOLICE(ROUGE)
+					POSXY(x-3,y-2)
+					ECRIRE("5")
+					COULEURFOND(BLANC)
+					COULEURPOLICE(BLANC)
+				FINSI
+				SINONSI y=28 ALORS
+					COULEURFOND(NOIR)
+					COULEURPOLICE(ROUGE)
+					POSXY(x-3,y-2)
+					ECRIRE("8")
+					COULEURFOND(BLANC)
+					COULEURPOLICE(BLANC)
+				FINSI
+			SINONSI (x=DECALAGECONSOLEX+18) ALORS
+				POSXY(x,y)
+				ECRIRE(" ")
+				
+				SI y=20 ALORS
+					COULEURFOND(NOIR)
+					COULEURPOLICE(ROUGE)
+					POSXY(x-3,y-2)
+					ECRIRE("3")
+					COULEURFOND(BLANC)
+					COULEURPOLICE(BLANC)
+				FINSI
+				SINONSI y=24 ALORS
+					COULEURFOND(NOIR)
+					COULEURPOLICE(ROUGE)
+					POSXY(x-3,y-2)
+					ECRIRE("6")
+					COULEURFOND(BLANC)
+					COULEURPOLICE(BLANC)
+				FINSI
+				SINONSI y=28 ALORS
+					COULEURFOND(NOIR)
+					COULEURPOLICE(ROUGE)
+					POSXY(x-3,y-2)
+					ECRIRE("9")
+					COULEURFOND(BLANC)
+					COULEURPOLICE(BLANC)
+				FINSI
+			FINSI
+			
+			SI (y=16) ALORS
+				POSXY(x,y)
+				ECRIRE(" ")
+			FINSI
+			SINONSI (y=(12 DIV 3)+16) ALORS
+				POSXY(x,y)
+				ECRIRE(" ")
+			FINSI
+			SINONSI (y=(12 DIV 3)+(12 DIV 3)+16) ALORS
+				POSXY(x,y)
+				ECRIRE(" ")
+			FINSI
+			SINONSI (t=28) ALORS
+				POSXY(x,y)
+				ECRIRE(" ")
+			FINSI
+				
+		FINPOUR
+	FINPOUR
+	
+FINPROCEDURE
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:affiche la grille du jeu
+	 *__ENTREE: 2 entier en local
+	 *__SORTIE:grille afficher à l'écran
+*********************************************************************************}
+PROCEDURE afficherGrille()
+VAR
+	x,y:ENTIER
+DEBUT
+
+	COULEURFOND(BLANC)
+	
+	POUR y<-DECALAGE A TAILLEY+DECALAGE FAIRE
+		POUR x<-DECALAGE A TAILLEX+DECALAGE FAIRE
+			
+			SI (y=DECALAGE) ALORS
+				POSXY(x,y)
+				ECRIRE(" ")
+			FINSI
+			SINONSI (TAILLEY DIV 3= y-DECALAGE) ALORS
+				POSXY(x,y)
+				ECRIRE(" ")
+			FINSI
+			SINONSI ((TAILLEY DIV 3)+(TAILLEY DIV 3)=y-DECALAGE) ALORS
+				POSXY(x,y)
+				ECRIRE(" ")
+			FINSI
+			SINONSI (TAILLEY=y-DECALAGE) ALORS
+				POSXY(x,y)
+				ECRIRE(" ")
+			FINSI
+			
+			SI (x=DECALAGE) ET (y<>DECALAGE) ALORS
+				POSXY(x,y)
+				ECRIRE(" ")
+			FINSI
+			SINONSI (TAILLEX DIV 3 = x-DECALAGE) ET (y<>DECALAGE) ALORS
+				POSXY(x,y)
+				ECRIRE(" ")
+			FINSI
+			SINONSI ((TAILLEX DIV 3)+(TAILLEX DIV 3)=x-DECALAGE) ET (y<>DECALAGE) ALORS
+				POSXY(x,y)
+				ECRIRE(" ")
+			FINSI
+			SINONSI (TAILLEX=x-DECALAGE) ET (y<>DECALAGE) ALORS
+				POSXY(x,y)
+				ECRIRE(" ")
+			FINSI
+			
+		FINPOUR
+	FINPOUR
+	
+	COULEURFOND(NOIR)
+
+FINPROCEDURE
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:affiche une croix à l'écran
+	 *__ENTREE:2 entier en local
+	 *__SORTIE:croix afficher
+*********************************************************************************}
+PROCEDURE afficherCroix(emplacement:ENTIER)
+VAR
+	i,cpt:ENTIER
+DEBUT
+	cpt<-DECALAGE+2
+	
+	CAS emplacement PARMIS
+		1:COULEURFOND(ROUGE)
+			
+			POUR i<-DECALAGE+2 A DECALAGE+8 FAIRE
+				POSXY(cpt,i)
+				ECRIRE(" ")
+				cpt<-cpt+1
+			FINPOUR
+			
+			cpt<-DECALAGE+2
+			POUR i<-DECALAGE+8 A DECALAGE+2 FAIRE
+				POSXY(cpt,i)
+				ECRIRE(" ")
+				cpt<-cpt+1
+				
+				SI (i=DECALAGE+8 DIV 2) ALORS
+					POSXY(cpt-2,i+1)
+					ECRIRE(" ")
+				FINSI
+			FINPOUR
+			COULEURFOND(NOIR)
+		
+		2:COULEURFOND(ROUGE)
+			
+			cpt<-DECALAGE+12
+			
+			POUR i<-DECALAGE+2 A DECALAGE+8 FAIRE
+				POSXY(cpt,i)
+				ECRIRE(" ")
+				cpt<-cpt+1
+			FINPOUR
+			
+			cpt<-DECALAGE+12
+			POUR i<-DECALAGE+8 A DECALAGE+2 FAIRE
+				POSXY(cpt,i)
+				ECRIRE(" ")
+				cpt<-cpt+1
+				
+				SI (i=DECALAGE+8 DIV 2) ALORS
+					POSXY(cpt-2,i+1)
+					ECRIRE(" ")
+				FINSI
+			FINPOUR
+			COULEURFOND(NOIR)
+		
+		3:COULEURFOND(ROUGE)
+			
+			cpt<-DECALAGE+22
+			
+			POUR i<-DECALAGE+2 A DECALAGE+8 FAIRE
+				POSXY(cpt,i)
+				ECRIRE(" ")
+				cpt<-cpt+1
+			FINPOUR
+			
+			cpt<-DECALAGE+22
+			POUR i<-DECALAGE+8 A DECALAGE+2 FAIRE
+				POSXY(cpt,i)
+				ECRIRE(" ")
+				cpt<-cpt+1
+				
+				SI (i=DECALAGE+8 DIV 2) ALORS
+					POSXY(cpt-2,i+1)
+					ECRIRE(" ")
+				FINSI
+			FINPOUR
+			COULEURFOND(NOIR)
+		
+		
+		4:COULEURFOND(ROUGE)
+			
+			POUR i<-DECALAGE+12 A DECALAGE+18 FAIRE
+				POSXY(cpt,i)
+				ECRIRE(" ")
+				cpt<-cpt+1
+			FINPOUR
+			
+			cpt<-DECALAGE+2
+			POUR i<-DECALAGE+18 A DECALAGE+12 FAIRE
+				POSXY(cpt,i)
+				ECRIRE(" ")
+				cpt<-cpt+1
+				
+				SI (i=((DECALAGE+18)+(DECALAGE+12)) DIV 2) ALORS
+					POSXY(cpt-1,i)
+					ECRIRE(" ")
+				FINSI
+			FINPOUR
+			COULEURFOND(NOIR)
+		
+		5:COULEURFOND(ROUGE)
+			
+			cpt<-DECALAGE+12
+			
+			POUR i<-DECALAGE+12 A DECALAGE+18 FAIRE
+				POSXY(cpt,i)
+				ECRIRE(" ")
+				cpt<-cpt+1
+			FINPOUR
+			
+			cpt<-DECALAGE+12
+			POUR i<-DECALAGE+18 A DECALAGE+12 FAIRE
+				POSXY(cpt,i)
+				ECRIRE(" ")
+				cpt<-cpt+1
+				
+				SI (i=((DECALAGE+18)+(DECALAGE+12)) DIV 2) ALORS
+					POSXY(cpt-1,i)
+					ECRIRE(" ")
+				FINSI
+			FINPOUR
+			COULEURFOND(NOIR)
+		
+		
+		6:COULEURFOND(ROUGE)
+			
+			cpt<-DECALAGE+22
+			
+			POUR i<-DECALAGE+12 A DECALAGE+18 FAIRE
+				POSXY(cpt,i)
+				ECRIRE(" ")
+				cpt<-cpt+1
+			FINPOUR
+			
+			cpt<-DECALAGE+22
+			POUR i<-DECALAGE+18 A DECALAGE+12 FAIRE
+				POSXY(cpt,i)
+				ECRIRE(" ")
+				cpt<-cpt+1
+				
+				SI (i=((DECALAGE+18)+(DECALAGE+12)) DIV 2) ALORS
+					POSXY(cpt-1,i)
+					ECRIRE(" ")
+				FINSI
+			FINPOUR
+			COULEURFOND(NOIR)
+		
+		7:COULEURFOND(ROUGE)
+			
+			POUR i<-DECALAGE+22 A DECALAGE+28 FAIRE
+				POSXY(cpt,i)
+				ECRIRE(" ")
+				cpt<-cpt+1
+			FINPOUR
+			
+			cpt<-DECALAGE+2
+			POUR i<-DECALAGE+28 A DECALAGE+22 FAIRE
+				POSXY(cpt,i)
+				ECRIRE(" ")
+				cpt<-cpt+1
+				
+				SI (i=((DECALAGE+28)+(DECALAGE+22)) DIV 2) ALORS
+					POSXY(cpt-1,i)
+					ECRIRE(" ")
+				FINSI
+			FINPOUR
+			COULEURFOND(NOIR)
+		
+		8:COULEURFOND(ROUGE)
+			
+			cpt<-DECALAGE+12
+			
+			POUR i<-DECALAGE+22 A DECALAGE+28 FAIRE
+				POSXY(cpt,i)
+				ECRIRE(" ")
+				cpt<-cpt+1
+			FINPOUR
+			
+			cpt<-DECALAGE+2
+			POUR i<-DECALAGE+28 A DECALAGE+22 FAIRE
+				POSXY(cpt,i)
+				ECRIRE(" ")
+				cpt<-cpt+1
+				
+				SI (i=((DECALAGE+28)+(DECALAGE+22)) DIV 2) ALORS
+					POSXY(cpt-1,i)
+					ECRIRE(" ")
+				FINSI
+			FINPOUR
+			COULEURFOND(NOIR)
+		
+		9:COULEURFOND(ROUGE)
+			
+			cpt<-DECALAGE+22
+			
+			POUR i<-DECALAGE+22 A DECALAGE+28 FAIRE
+				POSXY(cpt,i)
+				ECRIRE(" ")
+				cpt<-cpt+1
+			FINPOUR
+			
+			cpt<-DECALAGE+22
+			POUR i<-DECALAGE+28 A DECALAGE+22 FAIRE
+				POSXY(cpt,i)
+				ECRIRE(" ")
+				cpt<-cpt+1
+				
+				SI (i=((DECALAGE+28)+(DECALAGE+22)) DIV 2) ALORS
+					POSXY(cpt-1,i)
+					ECRIRE(" ")
+				FINSI
+			FINPOUR
+			COULEURFOND(NOIR)
+	
+	FINCASPARMIS
+FINPROCEDURE
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT: affiche un rond à l'écran
+	 *__ENTREE:3 entier
+	 *__SORTIE:rond afficher
+*********************************************************************************}
+PROCEDURE afficherRond(emplacement:ENTIER)
+VAR
+	i,j,cpt:ENTIER
+DEBUT
+
+	CAS emplacement PARMIS
+		1:COULEURFOND(BLEU)
+			
+			POUR i<-DECALAGE+2 A DECALAGE+8 FAIRE
+				POUR J<-DECALAGE+2 A DECALAGE+8 FAIRE
+					SI (i=DECALAGE+2) OU (i=DECALAGE+8) OU (j=DECALAGE+2) OU (j=DECALAGE+8) ALORS
+						POSXY(i,j)
+						ECRIRE(" ")
+					FINSI
+				FINPOUR
+			FINPOUR
+			COULEURFOND(NOIR)
+		
+		2:COULEURFOND(BLEU)
+			
+			POUR i<-DECALAGE+12 A DECALAGE+18 FAIRE
+				POUR J<-DECALAGE+2 A DECALAGE+8 FAIRE
+					SI (i=DECALAGE+12) OU (i=DECALAGE+18) OU (j=DECALAGE+2) OU (j=DECALAGE+8) ALORS
+						POSXY(i,j)
+						ECRIRE(" ")
+					FINSI
+				FINPOUR
+			FINPOUR
+			COULEURFOND(NOIR)
+		
+		3:COULEURFOND(BLEU)
+			
+			POUR i<-DECALAGE+22 A DECALAGE+28 FAIRE
+				POUR J<-DECALAGE+2 A DECALAGE+8 FAIRE
+					SI (i=DECALAGE+22) OU (i=DECALAGE+28) OU (j=DECALAGE+2) OU (j=DECALAGE+8) ALORS
+						POSXY(i,j)
+						ECRIRE(" ")
+					FINSI
+				FINPOUR
+			FINPOUR
+			COULEURFOND(NOIR)
+		
+		4:COULEURFOND(BLEU)
+			
+			POUR i<-DECALAGE+2 A DECALAGE+8 FAIRE
+				POUR J<-DECALAGE+12 A DECALAGE+18 FAIRE
+					SI (i=DECALAGE+2) OU (i=DECALAGE+8) OU (j=DECALAGE+12) OU (j=DECALAGE+18) ALORS
+						POSXY(i,j)
+						ECRIRE(" ")
+					FINSI
+				FINPOUR
+			FINPOUR
+			COULEURFOND(NOIR)
+		
+		5:COULEURFOND(BLEU)
+			
+			POUR i<-DECALAGE+12 A DECALAGE+18 FAIRE
+				POUR J<-DECALAGE+12 A DECALAGE+18 FAIRE
+					SI (i=DECALAGE+12) OU (i=DECALAGE+18) OU (j=DECALAGE+12) OU (j=DECALAGE+18) ALORS
+						POSXY(i,j)
+						ECRIRE(" ")
+					FINSI
+				FINPOUR
+			FINPOUR
+			COULEURFOND(NOIR)
+		
+		6:COULEURFOND(BLEU)
+			
+			POUR i<-DECALAGE+22 A DECALAGE+28 FAIRE
+				POUR J<-DECALAGE+12 A DECALAGE+18 FAIRE
+					SI (i=DECALAGE+22) OU (i=DECALAGE+28) OU (j=DECALAGE+12) OU (j=DECALAGE+18) ALORS
+						POSXY(i,j)
+						ECRIRE(" ")
+					FINSI
+				FINPOUR
+			FINPOUR
+			COULEURFOND(NOIR)
+		
+		7:COULEURFOND(BLEU)
+			
+			POUR i<-DECALAGE+2 A DECALAGE+8 FAIRE
+				POUR J<-DECALAGE+22 A DECALAGE+28 FAIRE
+					SI (i=DECALAGE+2) OU (i=DECALAGE+8) OU (j=DECALAGE+22) OU (j=DECALAGE+28) ALORS
+						POSXY(i,j)
+						ECRIRE(" ")
+					FINSI
+				FINPOUR
+			FINPOUR
+			COULEURFOND(NOIR)
+		
+		8:COULEURFOND(BLEU)
+			
+			POUR i<-DECALAGE+12 A DECALAGE+18 FAIRE
+				POUR J<-DECALAGE+22 A DECALAGE+28 FAIRE
+					SI (i=DECALAGE+12) OU (i=DECALAGE+18) OU (j=DECALAGE+22) OU (j=DECALAGE+28) ALORS
+						POSXY(i,j)
+						ECRIRE(" ")
+					FINSI
+				FINPOUR
+			FINPOUR
+			COULEURFOND(NOIR)
+		
+		9:COULEURFOND(BLEU)
+			
+			POUR i<-DECALAGE+22 A DECALAGE+28 FAIRE
+				POUR J<-DECALAGE+22 A DECALAGE+28 FAIRE
+					SI (i=DECALAGE+22) OU (i=DECALAGE+28) OU (j=DECALAGE+22) OU (j=DECALAGE+28) ALORS
+						POSXY(i,j)
+						ECRIRE(" ")
+					FINSI
+				FINPOUR
+			FINPOUR
+			COULEURFOND(NOIR)
+		
+	FINCASPARMIS
+
+FINPROCEDURE
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:initialise un tableau
+	 *__ENTREE: 1 tableau de type tChar en parametre et 1 entier en local
+	 *__SORTIE:tableau initialisé
+*********************************************************************************}
+PROCEDURE initTab(VAR tab:tChar)
+VAR
+	i:ENTIER
+DEBUT
+	POUR i<-1 A 9 FAIRE
+		tab[i]<-" "
+	FINPOUR
+FINPROCEDURE
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:efface un certain endroit de l'écran
+	 *__ENTREE:2 entier en local
+	 *__SORTIE:écran remplacer par des espaces
+*********************************************************************************}
+PROCEDURE clrtxt()
+VAR
+	i,j:ENTIER
+DEBUT
+	POUR i<-DECALAGECONSOLEX A DECALAGECONSOLEX+40 FAORE
+		POUR j<-DECALAGECONSOLEY A DECALAGECONSOLEY+8 FAIRE
+			POSXY(i,j)
+			ECRIRE(" ")
+		FINPOUR
+	FINPOUR
+FINPROCEDURE
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:Recupere le pseudo du joueur
+	 *__ENTREE: 1 chaine en parametre
+	 *__SORTIE:pseudo stocké
+*********************************************************************************}
+PROCEDURE pseudoJoueur(VAR joueur:CHAINE)
+DEBUT
+	ECRIRE("Entrez votre pseudo:")
+	LIRE(joueur)
+FINPROCEDURE
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:le tour d'un joueur, verification des valeurs entrer
+	 *__ENTREE:1 entier, 1 tableau tChar, 1 chaine en parametre
+	 *        1 entier et 1 chaine en local
+	 *__SORTIE:1 emplacement de la grille
+*********************************************************************************}
+PROCEDURE tourJoueur(joueur:CHAINE; VAR grilleJoueur:tChar; nbr:ENTIER)
+VAR
+	emplacement:ENTIER
+DEBUT
+
+	REPETER
+		
+		emplacement<-0
+		
+		POSXY(DECALAGECONSOLEX,DECALAGECONSOLEY)
+		ECRIRE(joueur, "entrez le numero de la case")
+		
+		REPETER
+			POSXY(DECALAGECONSOLEX,DECALAGECONSOLEY+1)
+			ECRIRE("-")
+			
+			LIRE(emplacement)
+			
+			SI (emplacement=0) OU (emplacement>9) ALORS
+				POSXY(DECALAGECONSOLEX,DECALAGECONSOLEY+1)
+			FINSI
+		JUSQUA (emplacement<>0) ET (emplacement<=9)
+		
+		SI grilleJoueur[emplacement]<>" " ALORS
+			POSXY(DECALAGECONSOLEX,DECALAGECONSOLEY+2)
+			ECRIRE("Emplacement deja occupe")
+		FINSI
+	JUSQUA grilleJoueur[emplacement]=" "
+	
+	SI (nbr=1) ALORS
+		afficherCroix(emplacement)
+		grilleJoueur[emplacement]<-"X"
+	FINSI
+	SINON
+		afficherRond(emplacement)
+		grilleJoueur[emplacement]<-"O"
+	FINSI
+	
+FINPROCEDURE
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT: test si le jeu est terminé ou si l'un des joueurs a gagner
+	 *__ENTREE: 1 tableau tChar en parametre et 2 entier en local
+	 *__SORTIE:1 entier
+*********************************************************************************}
+FONCTION testFin(grilleJoueur:tChar):ENTIER
+VAR
+	i,test:ENTIER
+DEBUT
+
+	POUR i<-1 A 9 FAIRE
+	
+		SI (grilleJoueur[1]="X") ET (grilleJoueur[5]="X") ET (grilleJoueur[9]="X") ALORS
+			test:=1
+		SINON
+			SI (grilleJoueur[3]="X") ET (grilleJoueur[5]="X") ET (grilleJoueur[7]="X") ALORS
+				test:=1
+		SINON
+			SI (grilleJoueur[1]="X") ET (grilleJoueur[2]="X") ET (grilleJoueur[3]="X") ALORS
+				test:=1
+		SINON
+			SI (grilleJoueur[4]="X") ET (grilleJoueur[5]="X") ET (grilleJoueur[6]="X") ALORS
+				test:=1
+		SINON
+			SI (grilleJoueur[7]="X") ET (grilleJoueur[8]="X") ET (grilleJoueur[9]="X") ALORS
+				test:=1
+		SINON
+			SI (grilleJoueur[1]="X") ET (grilleJoueur[4]="X") ET (grilleJoueur[7]="X") ALORS
+				test:=1
+		SINON
+			SI (grilleJoueur[2]="X") ET (grilleJoueur[5]="X") ET (grilleJoueur[8]="X") ALORS
+				test:=1
+		SINON
+			SI (grilleJoueur[3]="X") ET (grilleJoueur[6]="X") ET (grilleJoueur[9]="X") ALORS
+				test:=1
+		SINON
+			SI (grilleJoueur[1]="O") ET (grilleJoueur[5]="O") ET (grilleJoueur[9]="O") ALORS
+				test:=2
+		SINON
+			SI (grilleJoueur[3]="O") ET (grilleJoueur[5]="O") ET (grilleJoueur[7]="O") ALORS
+				test:=2
+		SINON
+			SI (grilleJoueur[1]="O") ET (grilleJoueur[2]="O") ET (grilleJoueur[3]="O") ALORS
+				test:=2
+		SINON
+			SI (grilleJoueur[4]="O") ET (grilleJoueur[5]="O") ET (grilleJoueur[6]="O") ALORS
+				test:=2
+		SINON
+			SI (grilleJoueur[7]="O") ET (grilleJoueur[8]="O") ET (grilleJoueur[9]="O") ALORS
+				test:=2
+		SINON
+			SI (grilleJoueur[1]="O") ET (grilleJoueur[4]="O") ET (grilleJoueur[7]="O") ALORS
+				test:=2
+		SINON
+			SI (grilleJoueur[2]="O") ET (grilleJoueur[5]="O") ET (grilleJoueur[8]="O") ALORS
+				test:=2
+		SINON
+			SI (grilleJoueur[3]="O") ET (grilleJoueur[6]="O") ET (grilleJoueur[9]="O") ALORS
+				test:=2
+		SINON
+			test:=3
+	FINPOUR
+	testFin<-test
+FINFONCTION
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:initialise un tableau
+	 *__ENTREE:1 tableau tJoueur en parametre et 1 entier en local
+	 *__SORTIE:tableau initialiser
+*********************************************************************************}
+PROCEDURE initJoueurs(VAR joueurs:tJoueur)
+VAR
+	i,j:ENTIER
+DEBUT
+
+	POUR i<-1 A 2 FAIRE
+		joueurs[i].manches<-0
+		
+		POUR j<-1 A 9 FAIRE
+			joueurs[i].nbrCoups[j]<-0
+		FINPOUR
+	FINPOUR
+
+FINPROCEDURE
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+{*************************PROCEDURE***//***FONCTION*******************************
+	 *_____BUT:création du fichier score
+	 *__ENTREE: 1 fichier Text, 1 tableau tJoueur, 2 chaine en parametre et 1 entier en local
+	 *__SORTIE:fichier créer et rempli
+*********************************************************************************}
+PROCEDURE createFichier(VAR f:Text; joueurs:tJoueur; debutHeure,finHeure:CHAINE)
+VAR
+	i,j:ENTIER
+DEBUT
+	
+	ASSIGNER(f,"score.txt")
+	AJOUTER(f)
+	
+	ECRIRE(f, "Heure de début: " + debutHeure)
+	
+	POUR i<-1 A 2 FAIRE
+		ECRIRE(f, joueurs[i].pseudo, " : ", joueurs[i].manches, " manches gagner"
+		POUR j<-1 A 9 FAIRE
+			SI (joueurs[i].nbrCoups[j]<>0) ALORS
+				ECRIRE(f, "Manche ", j, " gagner en ", joueurs[i].nbrCoups[j], " coup(s)")
+			FINSI
+		FINPOUR
+	FINPOUR
+	
+	SI (joueurs[1].manches > joueurs[2].manches) ALORS
+		ECRIRE(f, "Le joueur ", joueurs[1].pseudo, " a gagner la partie")
+	FINSI
+	SINONSI (joueurs[1].manches < joueurs[2].manches) ALORS
+		ECRIRE(f, "Le joueur ", joueurs[2].pseudo, " a gagner la partie")
+	FINSI
+	SINON
+		ECRIRE("Egalité")
+	FINSI
+	
+	ECRIRE(f, "Heure de fin: "+ finHeure)
+	
+	FERMER(f)
+	
+FINPROCEDURE
+//********************FIN***PROCEDURE***//***FONCTION*****************************
+
+
+VAR
+	i:ENTIER	//compteur
+	manches:ENTIER	//nbr de manche a jouer
+	debut:ENTIER	//ordre des joueurs
+	tour:ENTIER	//tour du jeu
+	fin:ENTIER	//variable de fin du jeu
+	grilleJoueur:tChar	//grille du jeu
+	choix:CARACTERE	//variable pour recommencer
+	recommencer:BOOLEEN	//test pour la boucle
+	joueurs:tJoueur	//tableau des joueurs
+	debutHeure,finHeure:CHAINE	//stock l'heure de la partie
+	fichier:Text	//le fichier score
+
+DEBUT
+
+	COULEURPOLICE(BLANC)
+	
+	POUR i<-1 A 2 FAIRE
+		ECRIRE("Joueur ", i)
+		pseudoJoueur(joueurs[i].pseudo)
+	FINPOUR
+
+	//début de la partie
+	REPETER
+		
+		ECRIRE("Combien de manches voulez vous jouer?")
+		ECRIRE("- ")
+		LIRE(manches)
+		
+		debut<-ALEATOIRE(2)+1
+		joueurs[i].forme<-ALEATOIRE(2)+1
+		
+		//nombre de manches a jouer
+		POUR i<-1 A manches FAIRE
+			
+			//choix entre rond ou croix par rapport au joueurs
+			SI joueurs[1].forme=1 ALORS
+				joueurs[2].forme<-2
+				POSXY(DECALAGE,2)
+				ECRIRE(joueurs[1].pseudo, " a les croix")
+				POSXY(DECALAGE,3)
+				ECRIRE(joueurs[2].pseudo, " a les ronds")
+			FINSI
+			SINON
+				joueurs[2].forme<-1
+				POSXY(DECALAGE,2)
+				ECRIRE(joueurs[1].pseudo, " a les ronds")
+				POSXY(DECALAGE,3)
+				ECRIRE(joueurs[2].pseudo, " a les croix")
+			FINSI
+			
+			//on récupere l'heure de début
+			debutHeure<-HEUREACTUELLE
+			
+			tour<-0
+			choix<-" "
+			recommencer<-VRAI
+			fin<-3
+			
+			initTab(grilleJoueur)
+			
+			afficherGrille()
+			afficherAide()
+			
+			POSXY(DECALAGECONSOLEX+1,DECALAGECONSOLEY-1)
+			ECRIRE("Manche ",i)
+			
+			//début de la manche
+			REPETER
+				
+				POSXY(DECALAGECONSOLEX,DECALAGECONSOLEY-4)
+				ECRIRE(joueurs[1].pseudo,": ",joueurs[1].manches, " manche(s) gagne")
+				POSXY(DECALAGECONSOLEX,DECALAGECONSOLEY-3)
+				ECRIRE(joueurs[2].pseudo, ": ", joueurs[2].manches, " manche(s) gagne")
+				
+				//début du jeu
+				clrtxt()
+				tour<-tour+1
+				
+				CAS debut PARMIS
+					1:CAS joueurs[1].forme PARMIS
+							1:tourJoueur(joueurs[1].pseudo,grilleJoueur,1)
+							2:tourJoueur(joueurs[1].pseudo,grilleJoueur,2)
+					
+					2:CAS joueurs[2].forme PARMIS
+							1:tourJoueur(joueurs[2].pseudo,grilleJoueur,1)
+							2:tourJoueur(joueurs[2].pseudo,grilleJoueur,2)
+							
+				FINCASPARMIS
+				
+				//inverse le tour des joueurs
+				SI debut=1 ALORS
+					joueurs[debut].nbrcoups[i]<-joueurs[debut].nbrcoups[i]+1
+				FINSI
+				SINON
+					joueurs[debut].nbrcoups[i]<-joueurs[debut].nbrcoups[i]+1
+					debut<-1;
+				FINSI
+				
+				SI tour>=5 ALORS
+					fin<-testFin(grilleJoueur)
+			JUSQUA (tour=9) OU (fin=1) OU (fin=2)
+			
+			clrtxt()
+			
+			//verifie quel forme (rond ou croix) fini la manche
+			SI joueurs[1].forme=fin ALORS
+				POSXY(DECALAGECONSOLEX,DECALAGECONSOLEY)
+				ECRIRE(joueurs[1].pseudo, " a gagner la manche")
+				joueurs[1].manches<-joueurs[1].manches+1
+			FINSI
+			SINONSi joueurs[2].forme=fin ALORS
+				POSXY(DECALAGECONSOLEX,DECALAGECONSOLEY)
+				ECRIRE(joueurs[2].pseudo, " a gagner la manche")
+				joueurs[2].manches<-joueurs[2].manches+1
+			FINSI
+			SINON
+				POSXY(DECALAGECONSOLEX,DECALAGECONSOLEY+1)
+				ECRIRE("Egalité !")
+			FINSI
+			
+			//si la boucle atteint le nbr de manche, la partie est terminé
+			SI i=manches ALORS
+				clrtxt()
+				
+				SI joueurs[1].manches>joueurs[2].manches ALORS
+					POSXY(DECALAGECONSOLEX,DECALAGECONSOLEY)
+					ECRIRE(joueurs[1].pseudo, " a gagner")
+				FINSI
+				SINONSI	joueurs[2].manches>joueurs[1].manches ALORS
+					POSXY(DECALAGECONSOLEX,DECALAGECONSOLEY)
+					ECRIRE(joueurs[2].pseudo, " a gagner")
+				FINSI
+				SINON
+					POSXY(DECALAGECONSOLEX,DECALAGECONSOLEY)
+					ECRIRE("Egalité")
+				FINSI
+			FINSI
+			
+			POSXY(DECALAGECONSOLEX,DECALAGECONSOLEY-4)
+			ECRIRE(joueurs[1].pseudo,": ", joueurs[1].manches, " manch(s) gagne")
+			POSXY(DECALAGECONSOLEX,DECALAGECONSOLEY-3)
+			ECRIRE(joueurs[2].pseudo,": ", joueurs[2].manches, " manch(s) gagne")
+				
+		FINPOUR 
+		
+		finHeure<-HEUREACTUELLE
+		
+		//on créer le fichier
+		createFichier(fichier,joueurs,debutHeure,finHeure)
+		
+		//propose de recommencer
+		POSXY(DECALAGECONSOLEX,DECALAGECONSOLEY+1)
+		ECRIRE("Voulez vous rejouer ? O/N")
+		
+		REPETER
+			POSXY(DECALAGECONSOLEX,DECALAGECONSOLEY+2)
+			ECRIRE("- ")
+			LIRE(choix)
+			
+			SI (choix<>"O") OU '(choix<>"N") ALORS
+				POSXY(DECALAGECONSOLEX,DECALAGECONSOLEY+3)
+				ECRIRE("Erreur, O ou N")
+			FINSI
+		JUSQUA (choix="O") OR (choix="N")
+		
+		clrtxt()
+		
+		SI chhoix="O" ALORS
+			recommencer<-FAUX
+		
+		initJoueurs(joueurs)
+	
+	JUSQUA recommencer=FAUX
+
+FIN.
+
+//**************************FIN****PRINCIPAL**************************************
